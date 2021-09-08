@@ -55,10 +55,10 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	/** Handler for when a touch input begins. */
-	void TouchStarted(ETouchIndex::Type FingerIndex, FVector Location);
+	void TouchStarted(ETouchIndex::Type FingerIndex, FVector InLocation);
 
 	/** Handler for when a touch input stops. */
-	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
+	void TouchStopped(ETouchIndex::Type FingerIndex, FVector InLocation);
 
 protected:
 	// APawn interface

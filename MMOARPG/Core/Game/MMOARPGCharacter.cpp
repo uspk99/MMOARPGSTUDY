@@ -90,12 +90,12 @@ void AMMOARPGCharacter::OnResetVR()
 #endif
 
 
-void AMMOARPGCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
+void AMMOARPGCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector InLocation)
 {
 		Jump();
 }
 
-void AMMOARPGCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
+void AMMOARPGCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector InLocation)
 {
 		StopJumping();
 }

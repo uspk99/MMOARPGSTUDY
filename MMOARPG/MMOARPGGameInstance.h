@@ -30,6 +30,7 @@ public:
 
 	void LinkServer();
 	void LinkServer(const FSimpleAddr& InAddr);
+	void LinkServer(const TCHAR *InIP,uint32 InPort);
 
 	FSimpleNetManage* GetClient();
 
