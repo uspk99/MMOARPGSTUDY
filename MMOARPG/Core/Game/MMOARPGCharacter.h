@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../Common/Interface/KneadingInterface.h"
+#include "MMOARPGType.h"
 #include "MMOARPGCharacter.generated.h"
 
 UCLASS(config=Game)
-class AMMOARPGCharacter : public ACharacter
+class AMMOARPGCharacter : public ACharacter, public IKneadingInterface
 {
 	GENERATED_BODY()
 
@@ -20,6 +22,10 @@ class AMMOARPGCharacter : public ACharacter
 	class UCameraComponent* FollowCamera;
 public:
 	AMMOARPGCharacter();
+
+	//…Ë÷√ƒÛ¡≥≤Œ ˝
+	virtual void UpdateKneadingBody(const FMMOARPGCharacterAppearance& InCA);
+	virtual void UpdateKneadingBody();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
