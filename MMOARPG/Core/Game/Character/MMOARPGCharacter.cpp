@@ -48,36 +48,7 @@ AMMOARPGCharacter::AMMOARPGCharacter()
 }
 
 
-void AMMOARPGCharacter::UpdateKneadingBody(const FMMOARPGCharacterAppearance& InCA)
-{
-	SetLegSize(InCA.LegSize);
-	SetWaistSize(InCA.WaistSize);
-	SetArmSize(InCA.ArmSize);
-	SetHeadtSize(InCA.HeadSize);
-	SetChestSize(InCA.ChestSize);
 
-	//需要Mesh与骨骼一致变化
-	SetMeshPostion(GetMesh());
-}
-
-
-void AMMOARPGCharacter::UpdateKneadingBody()
-{
-	//if (SlotID != INDEX_NONE)
-	//{
-	//	if (AHallPlayerState* InState = GetWorld()->GetFirstPlayerController()->GetPlayerState<AHallPlayerState>())
-	//	{
-	//		if (FMMOARPGCharacterAppearance* InCA = InState->GetCharacterCA(SlotID))
-	//		{
-	//			UpdateKneadingBody(*InCA);
-	//		}
-	//		else if (InState->GetCurrentTmpCreateCharacter() && InState->GetCurrentTmpCreateCharacter()->SlotPosition == SlotID)
-	//		{
-	//			UpdateKneadingBody(*InState->GetCurrentTmpCreateCharacter());
-	//		}
-	//	}
-	//}
-}
 
 //////////////////////////////////////////////////////////////////////////
 // Input

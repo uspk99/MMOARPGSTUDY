@@ -1,7 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "MMOARPGGameMode.h"
-#include "MMOARPGCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "MMOARPGHUD.h"
 #include "../../MMOARPGGameInstance.h"
