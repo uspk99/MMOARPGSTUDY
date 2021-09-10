@@ -6,7 +6,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 
 UMMOARPGAnimInstanceBase::UMMOARPGAnimInstanceBase()
-	:Speed(0.f),bDeath(false),bInAir(false)
+	:Speed(0.f),bDeath(false),bInAir(false),bFight(false)
 {
 
 }
@@ -24,6 +24,7 @@ void UMMOARPGAnimInstanceBase::NativeUpdateAnimation(float DeltaSeconds)
 		//更新速度
 		Speed = InCharacterBase->GetVelocity().Size();
 		bInAir = InCharacterBase->GetMovementComponent()->IsFalling();
+		bFight = InCharacterBase->IsFight();
 	}
 
 }

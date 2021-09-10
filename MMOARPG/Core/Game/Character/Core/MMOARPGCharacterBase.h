@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "MMOARPG/DataTable/CharacterAnimTable.h"
 #include "MMOARPGCharacterBase.generated.h"
 
 UCLASS()
@@ -26,4 +27,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	FORCEINLINE bool IsFight() { return bFight;}
+	FORCEINLINE FCharacterAnimTable *GetAnimTable() { return AnimTable; }
+protected:
+	UPROPERTY()
+	bool bFight;
+
+	UPROPERTY(EditDefaultsOnly,Category="Character")
+	int32 ID;
+
+	FCharacterAnimTable* AnimTable;
 };

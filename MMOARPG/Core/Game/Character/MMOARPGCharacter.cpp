@@ -60,6 +60,8 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("SwitchFight", IE_Pressed, this, &AMMOARPGCharacter::SwitchFight);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMMOARPGCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMMOARPGCharacter::MoveRight);
 
@@ -101,6 +103,33 @@ void AMMOARPGCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector InLo
 void AMMOARPGCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector InLocation)
 {
 		StopJumping();
+}
+
+
+void AMMOARPGCharacter::SwitchFight()
+{
+	if (bFight)
+	{
+		bFight = false;
+		if (FCharacterAnimTable* InAnimTable = GetAnimTable())
+		{
+			if (InAnimTable->SwitchFightMontage)
+			{
+				PlayAnimMontage(InAnimTable->SwitchFightMontage,1.f,TEXT("1"));
+			}		
+		}
+	}
+	else
+	{
+		bFight = true;
+		if (FCharacterAnimTable* InAnimTable = GetAnimTable())
+		{
+			if (InAnimTable->SwitchFightMontage)
+			{
+				PlayAnimMontage(InAnimTable->SwitchFightMontage, 1.f, TEXT("0"));
+			}
+		}
+	}
 }
 
 void AMMOARPGCharacter::TurnAtRate(float Rate)

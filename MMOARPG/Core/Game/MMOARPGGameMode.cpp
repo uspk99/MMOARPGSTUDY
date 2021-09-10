@@ -7,11 +7,15 @@
 #include "ThreadManage.h"
 #include "SimpleNetManage.h"
 #include "UObject/SimpleController.h"
+#include "MMOARPGPlayerState.h"
+#include "MMOARPGGameState.h"
 
 
 AMMOARPGGameMode::AMMOARPGGameMode()
 {
 	HUDClass = AMMOARPGHUD::StaticClass();
+	PlayerStateClass = AMMOARPGPlayerState::StaticClass();
+	GameStateClass = AMMOARPGGameState::StaticClass();
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
 	if (PlayerPawnBPClass.Class != NULL)
