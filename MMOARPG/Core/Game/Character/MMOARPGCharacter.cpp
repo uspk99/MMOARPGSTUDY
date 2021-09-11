@@ -111,25 +111,15 @@ void AMMOARPGCharacter::SwitchFight()
 	if (bFight)
 	{
 		bFight = false;
-		if (FCharacterAnimTable* InAnimTable = GetAnimTable())
-		{
-			if (InAnimTable->SwitchFightMontage)
-			{
-				PlayAnimMontage(InAnimTable->SwitchFightMontage,1.f,TEXT("1"));
-			}		
-		}
 	}
 	else
 	{
 		bFight = true;
-		if (FCharacterAnimTable* InAnimTable = GetAnimTable())
-		{
-			if (InAnimTable->SwitchFightMontage)
-			{
-				PlayAnimMontage(InAnimTable->SwitchFightMontage, 1.f, TEXT("0"));
-			}
-		}
 	}
+	//客户端播放
+	FightChanged();
+	//通知服务器
+	SwitchFightOnServer(bFight);
 }
 
 void AMMOARPGCharacter::TurnAtRate(float Rate)
@@ -170,5 +160,24 @@ void AMMOARPGCharacter::MoveRight(float Value)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
+	}
+}
+
+void AMMOARPGCharacter::FightChanged()
+{
+	if (FCharacterAnimTable* InAnimTable = GetAnimTable())
+	{
+		if (InAnimTable->SwitchFightMontage)
+		{
+			PlayAnimMontage(InAnimTable->SwitchFightMontage, 1.f,
+				bFight == true ? TEXT("0") : TEXT("1"));
+		}
+	}
+}
+void AMMOARPGCharacter::OnRep_FightChanged()
+{
+	if (GetLocalRole() != ROLE_Authority)
+	{
+		FightChanged();
 	}
 }

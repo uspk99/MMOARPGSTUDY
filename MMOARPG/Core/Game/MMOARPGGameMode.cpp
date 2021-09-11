@@ -9,7 +9,9 @@
 #include "UObject/SimpleController.h"
 #include "MMOARPGPlayerState.h"
 #include "MMOARPGGameState.h"
-
+#include "Character/MMOARPGCharacter.h"
+#include "ThreadManage.h"
+#include "Character/MMOARPGPlayerCharacter.h"
 
 AMMOARPGGameMode::AMMOARPGGameMode()
 {
@@ -98,5 +100,28 @@ void AMMOARPGGameMode::LinkServerInfo(ESimpleNetErrorType Intype, const FString&
 void AMMOARPGGameMode::RecvProtocol(uint32 ProtocolNumber, FSimpleChannel* Channel)
 {
 
+}
+
+//DS Server
+void AMMOARPGGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	GThread::Get()->GetCoroutines().BindLambda(1.f, [&](APlayerController* InNewPlayer)
+		{
+			if (InNewPlayer)
+			{
+				//if (AMMOARPGPlayerCharacter* InPawn = InNewPlayer->GetPawn<AMMOARPGPlayerCharacter>())
+				//{
+				//	if (AMMOARPGGameState* InGameState = GetGameState<AMMOARPGGameState>())
+				//	{
+				//		if (FCharacterAnimTable* InAnimTable = InGameState->GetCharacterAnimTable(InPawn->GetID()))
+				//		{
+				//			InPawn->AnimTable = InAnimTable;
+				//		}
+				//	}
+				//}
+			}
+		},NewPlayer);
 }
 

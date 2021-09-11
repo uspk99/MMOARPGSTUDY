@@ -24,7 +24,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 
-	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -35,6 +34,10 @@ private:
 	void LinkServerInfo(ESimpleNetErrorType Intype, const FString& InMsg);
 	void LinkServer();
 	void RecvProtocol(uint32 ProtocolNumber, FSimpleChannel* Channel);
+
+protected:
+	//½Ó¿Ú
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 private:
 	FDelegateHandle RecvDelegate;
 };

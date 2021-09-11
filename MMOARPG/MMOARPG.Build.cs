@@ -18,7 +18,8 @@ public class MMOARPG : ModuleRules
 			"MMOARPGCommon",
             "Slate",
             "SlateCore",
-			"SimpleActorBrowsing"});
+			"SimpleActorBrowsing",
+			"SimpleCombat"});
 
         bEnableShadowVariableWarnings = false;
         bEnableUndefinedIdentifierWarnings = false;

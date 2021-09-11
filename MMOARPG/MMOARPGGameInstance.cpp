@@ -15,8 +15,9 @@ void UMMOARPGGameInstance::Tick(float DeltaTime)
 	if (Client)
 	{
 		Client->Tick(DeltaTime);
-		GThread::Get()->Tick(DeltaTime);
+		
 	}
+	GThread::Get()->Tick(DeltaTime);
 }
 
 TStatId UMMOARPGGameInstance::GetStatId() const

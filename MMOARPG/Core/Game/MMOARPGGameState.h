@@ -11,7 +11,7 @@
  * 
  */
 UCLASS()
-class MMOARPG_API AMMOARPGGameState : public AGameState
+class MMOARPG_API AMMOARPGGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 

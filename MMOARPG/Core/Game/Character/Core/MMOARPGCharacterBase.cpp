@@ -2,6 +2,8 @@
 
 
 #include "MMOARPGCharacterBase.h"
+#include "../../MMOARPGGameState.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
@@ -16,7 +18,17 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 void AMMOARPGCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	if (GetWorld())
+	{
+		if (AMMOARPGGameState* InGameState = GetWorld()->GetGameState<AMMOARPGGameState>())
+		{
+			if (FCharacterAnimTable* InAnimTable = InGameState->GetCharacterAnimTable(GetID()))
+			{
+				AnimTable = InAnimTable;
+			}
+		}
+	}
+
 }
 
 // Called every frame
@@ -33,3 +45,25 @@ void AMMOARPGCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 }
 
+void AMMOARPGCharacterBase::OnRep_FightChanged()
+{
+
+}
+
+void AMMOARPGCharacterBase::SwitchFightOnServer_Implementation(bool bNewFight)
+{
+	bFight = bNewFight;
+}
+
+void AMMOARPGCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	//更新变量   只更新模拟玩家
+	DOREPLIFETIME_CONDITION(AMMOARPGCharacterBase, bFight, COND_SimulatedOnly);
+}
+
+void AMMOARPGCharacterBase::AnimSignal(int32 InSignal)
+{
+	K2_AnimSignal(InSignal);
+}
