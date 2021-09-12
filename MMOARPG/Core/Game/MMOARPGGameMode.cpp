@@ -12,6 +12,7 @@
 #include "Character/MMOARPGCharacter.h"
 #include "ThreadManage.h"
 #include "Character/MMOARPGPlayerCharacter.h"
+#include "SimpleAdvancedAnimationBPLibrary.h"
 
 AMMOARPGGameMode::AMMOARPGGameMode()
 {
@@ -36,6 +37,8 @@ void AMMOARPGGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 
 	Super::EndPlay(EndPlayReason);
+
+	USimpleAdvancedAnimationBPLibrary::Destroy();
 
 	if (UMMOARPGGameInstance* InGameInstance = GetGameInstance<UMMOARPGGameInstance>())
 	{

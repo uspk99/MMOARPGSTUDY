@@ -38,7 +38,6 @@ public:
 	FORCEINLINE bool IsFight() { return bFight;}
 
 	FORCEINLINE FCharacterAnimTable *GetAnimTable() { return AnimTable; }
-	FORCEINLINE void SetAnimTable(FCharacterAnimTable* InAnimTable) { AnimTable = InAnimTable; }
 	FORCEINLINE int32 GetID() { return ID; }
 protected:
 	//服务器，同步

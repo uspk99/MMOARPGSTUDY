@@ -4,11 +4,29 @@
 #include "MMOARPGAnimInstanceBase.h"
 #include "../../../Character/Core/MMOARPGCharacterBase.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "SimpleAdvancedAnimationBPLibrary.h"
 
 UMMOARPGAnimInstanceBase::UMMOARPGAnimInstanceBase()
-	:Speed(0.f),bDeath(false),bInAir(false),bFight(false)
+	:Speed(0.f),
+	bDeath(false),
+	bInAir(false),
+	bFight(false),
+	bFootIK(false),
+	FootIKID(INDEX_NONE),
+	LeftBoneName(TEXT("foot_l")),
+	RightBoneName(TEXT("foot_r"))
 {
 
+}
+
+void UMMOARPGAnimInstanceBase::InitAnimInstance(ACharacter* InCharacter)
+{
+	if (bFootIK)
+	{
+		BoneNames.Add(LeftBoneName);
+		BoneNames.Add(RightBoneName);
+		FootIKID = USimpleAdvancedAnimationBPLibrary::CreateFootIK(InCharacter, BoneNames);
+	}
 }
 
 void UMMOARPGAnimInstanceBase::NativeInitializeAnimation()
@@ -27,4 +45,30 @@ void UMMOARPGAnimInstanceBase::NativeUpdateAnimation(float DeltaSeconds)
 		bFight = InCharacterBase->IsFight();
 	}
 
+	if (bFootIK&& FootIKID!=INDEX_NONE)
+	{
+		TArray<float> OffsetArray;		
+		//¿¼ÂÇË«ÍÈ
+		float LOffset = GetFootIKOffset(LeftBoneName);
+		float ROffset = GetFootIKOffset(RightBoneName);
+
+		OffsetArray.Add(LOffset);
+		OffsetArray.Add(ROffset);
+
+		ButtZOffset = USimpleAdvancedAnimationBPLibrary::GetButtZOffset(OffsetArray);
+
+
+		LeftOffset = -(ButtZOffset - LOffset);
+		RightOffset = ButtZOffset - ROffset;
+	}
+
+}
+
+float UMMOARPGAnimInstanceBase::GetFootIKOffset(const FName& InBoneName)
+{
+	if (FootIKID!=INDEX_NONE)
+	{
+		return USimpleAdvancedAnimationBPLibrary::FindOffset(FootIKID, InBoneName);
+	}
+	return 0.0f;
 }

@@ -4,6 +4,7 @@
 #include "MMOARPGCharacterBase.h"
 #include "../../MMOARPGGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "../../Animation/Instance/Core/MMOARPGAnimInstanceBase.h"
 
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
@@ -27,8 +28,19 @@ void AMMOARPGCharacterBase::BeginPlay()
 				AnimTable = InAnimTable;
 			}
 		}
-	}
+		if (!GetWorld()->IsServer())
+		{
+			if (GetMesh())
+			{
+				if (UMMOARPGAnimInstanceBase* InstanceBase
+					= Cast<UMMOARPGAnimInstanceBase>(GetMesh()->GetAnimInstance()))
+				{
+					InstanceBase->InitAnimInstance(this);
+				} 
+			}
 
+		}
+	}
 }
 
 // Called every frame
