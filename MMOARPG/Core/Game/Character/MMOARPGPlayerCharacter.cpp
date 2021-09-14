@@ -2,12 +2,54 @@
 
 
 #include "MMOARPGPlayerCharacter.h"
+#include "../../../MMOARPGGameInstance.h"
+#include "../MMOARPGGameMode.h"
+#include "ThreadManage.h"
+#include "../../../MMOARPGMacroType.h"
+
+void AMMOARPGPlayerCharacter::UpdateKneadingRequest()
+{
+	if (UMMOARPGGameInstance* InGameInstance = GetWorld()->GetGameInstance<UMMOARPGGameInstance>())
+	{
+#if UE_MMOARPG_DEBUG_DS
+		CallServerUpdateKneading(1);
+#endif
+
+	CallServerUpdateKneading(InGameInstance->GetUserData().ID);
+	}
+}
+
+void AMMOARPGPlayerCharacter::CallUpdateKneadingBody_Implementation(const FMMOARPGCharacterAppearance& InCA)
+{
+	UpdateKneadingBody(InCA);
+}
+
+void AMMOARPGPlayerCharacter::CallServerUpdateKneading_Implementation(int32 InUserID)
+{
+	//DS·þÎñÆ÷
+	if (AMMOARPGGameMode* InGameMode = GetWorld()->GetAuthGameMode<AMMOARPGGameMode>())
+	{
+		UserID = InUserID;
+		InGameMode->LoginCharacterUpdateKneadingRequest(InUserID);
+	}
+}
 
 void AMMOARPGPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
 	InitKneadingLocation(GetMesh()->GetComponentLocation());
+
+	if (GetLocalRole()==ENetRole::ROLE_AutonomousProxy)
+	{
+#if !UE_MMOARPG_DEBUG_DS
+		UpdateKneadingRequest();
+#endif
+	}
+	else if (GetLocalRole() == ENetRole::ROLE_SimulatedProxy)//Ä£Äâ
+	{
+
+	}
 }
 
 void AMMOARPGPlayerCharacter::UpdateKneadingBody(const FMMOARPGCharacterAppearance& InCA)

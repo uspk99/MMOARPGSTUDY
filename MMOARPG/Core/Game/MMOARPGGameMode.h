@@ -40,6 +40,9 @@ protected:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 private:
 	FDelegateHandle RecvDelegate;
+
+public:
+	void LoginCharacterUpdateKneadingRequest(int32 InUserID);
 };
 
 

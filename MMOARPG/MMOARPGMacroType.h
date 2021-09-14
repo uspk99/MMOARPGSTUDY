@@ -1,5 +1,7 @@
 #include "MMOARPGGameInstance.h"
 
+#define UE_MMOARPG_DEBUG_DS 1
+
 //跨平台
 //InGameInstance_A后缀防止重定义
 #if PLATFORM_WINDOWS

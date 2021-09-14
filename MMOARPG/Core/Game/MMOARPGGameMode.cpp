@@ -13,12 +13,19 @@
 #include "ThreadManage.h"
 #include "Character/MMOARPGPlayerCharacter.h"
 #include "SimpleAdvancedAnimationBPLibrary.h"
+#include "Protocol/GameProtocol.h"
+#include "../../MMOARPGMacroType.h"
+#include "Core/MethodUnit.h"
+#include "MMOARPGPlayerController.h"
+
+
 
 AMMOARPGGameMode::AMMOARPGGameMode()
 {
 	HUDClass = AMMOARPGHUD::StaticClass();
 	PlayerStateClass = AMMOARPGPlayerState::StaticClass();
 	GameStateClass = AMMOARPGGameState::StaticClass();
+	PlayerControllerClass = AMMOARPGPlayerController::StaticClass();
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
 	if (PlayerPawnBPClass.Class != NULL)
@@ -102,7 +109,37 @@ void AMMOARPGGameMode::LinkServerInfo(ESimpleNetErrorType Intype, const FString&
 
 void AMMOARPGGameMode::RecvProtocol(uint32 ProtocolNumber, FSimpleChannel* Channel)
 {
+	switch (ProtocolNumber)
+	{
+	case SP_UpdateLoginCharacterInfoResponses:
+	{
+		int32 UserID = INDEX_NONE;
+		FString CAString;
+		SIMPLE_PROTOCOLS_RECEIVE(SP_UpdateLoginCharacterInfoResponses, UserID, CAString);
+		if (UserID!=INDEX_NONE && !CAString.IsEmpty())
+		{
+			FMMOARPGCharacterAppearance CA;
+			NetDataAnalysis::StringToCharacterAppearances(CAString, CA);
 
+			//遍历寻找对应Id玩家
+			MethodUnit::ServerCallAllPlayer<AMMOARPGPlayerCharacter>(GetWorld(),
+				[&](AMMOARPGPlayerCharacter* InPawn)->MethodUnit::EServerCallType
+				{
+					if (InPawn->GetUserID() == UserID)
+					{
+						InPawn->UpdateKneadingBody(CA);
+						InPawn->CallUpdateKneadingBody(CA);
+						return MethodUnit::EServerCallType::PROGRESS_COMPLETE;
+					}
+					return MethodUnit::EServerCallType::INPROGRESS;
+				});
+		}
+
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 //DS Server
@@ -126,5 +163,10 @@ void AMMOARPGGameMode::PostLogin(APlayerController* NewPlayer)
 				//}
 			}
 		},NewPlayer);
+}
+
+void AMMOARPGGameMode::LoginCharacterUpdateKneadingRequest(int32 InUserID)
+{
+	SEND_DATA(SP_UpdateLoginCharacterInfoRequests, InUserID);
 }
 
