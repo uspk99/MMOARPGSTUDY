@@ -28,7 +28,7 @@ void FMMOARPGGateRobot::RunCharacterAppearanceRequests()
 void FMMOARPGGateRobot::RunLoginToDSServerRequests()
 {
 	int32 ID = 1;
-	int32 InSlotID = 3;
+	int32 InSlotID = 1;
 
 	SIMPLE_CLIENT_SEND(GateClient, SP_LoginToDSServerRequests, ID, InSlotID);
 }

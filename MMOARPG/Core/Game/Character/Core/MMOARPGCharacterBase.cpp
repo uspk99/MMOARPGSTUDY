@@ -5,10 +5,12 @@
 #include "../../MMOARPGGameState.h"
 #include "Net/UnrealNetwork.h"
 #include "../../Animation/Instance/Core/MMOARPGAnimInstanceBase.h"
+#include "../../../../MMOARPGGameInstance.h"
 
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
-	:bFight(false),ID(INDEX_NONE),UserID(INDEX_NONE)
+	:bFight(false),ID(INDEX_NONE)
+	,UserID(1)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;

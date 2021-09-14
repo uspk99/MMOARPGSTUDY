@@ -43,6 +43,8 @@ private:
 
 public:
 	void LoginCharacterUpdateKneadingRequest(int32 InUserID);
+
+
 };
 
 

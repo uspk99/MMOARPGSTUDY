@@ -24,7 +24,7 @@ public:
 	//客户端更新角色接口
 	//需要将FMMOARPGCharacterAppearance暴露给蓝图
 	UFUNCTION(Client, Reliable)
-	void CallUpdateKneadingBody(const FMMOARPGCharacterAppearance& InCA);
+	void CallUpdateKneadingBodyOnClient(const FMMOARPGCharacterAppearance& InCA);
 
 protected:
 	//Reliable:TCP

@@ -118,9 +118,27 @@ void AMMOARPGGameMode::RecvProtocol(uint32 ProtocolNumber, FSimpleChannel* Chann
 		SIMPLE_PROTOCOLS_RECEIVE(SP_UpdateLoginCharacterInfoResponses, UserID, CAString);
 		if (UserID!=INDEX_NONE && !CAString.IsEmpty())
 		{
-			FMMOARPGCharacterAppearance CA;
-			NetDataAnalysis::StringToCharacterAppearances(CAString, CA);
 
+			MethodUnit::ServerCallAllPlayerController<AMMOARPGPlayerController>(GetWorld(),
+				[&](AMMOARPGPlayerController* InController)->MethodUnit::EServerCallType
+				{
+					if (AMMOARPGPlayerCharacter* InPawn = InController->GetPawn<AMMOARPGPlayerCharacter>())
+					{
+						if (InPawn->GetUserID() == UserID)
+						{
+							if (AMMOARPGPlayerState* InPlayerState= InController->GetPlayerState<AMMOARPGPlayerState>())
+							{
+								NetDataAnalysis::StringToCharacterAppearances(CAString, InPlayerState->GetCA());
+								InPawn->UpdateKneadingBody(InPlayerState->GetCA());
+								InPawn->CallUpdateKneadingBodyOnClient(InPlayerState->GetCA());
+							}
+							return MethodUnit::EServerCallType::PROGRESS_COMPLETE;
+						}
+					}
+					return MethodUnit::EServerCallType::INPROGRESS;
+				});
+
+#if 0
 			//遍历寻找对应Id玩家
 			MethodUnit::ServerCallAllPlayer<AMMOARPGPlayerCharacter>(GetWorld(),
 				[&](AMMOARPGPlayerCharacter* InPawn)->MethodUnit::EServerCallType
@@ -133,6 +151,8 @@ void AMMOARPGGameMode::RecvProtocol(uint32 ProtocolNumber, FSimpleChannel* Chann
 					}
 					return MethodUnit::EServerCallType::INPROGRESS;
 				});
+#endif
+
 		}
 
 		break;

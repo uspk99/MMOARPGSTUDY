@@ -40,6 +40,8 @@ public:
 	FORCEINLINE FCharacterAnimTable *GetAnimTable() { return AnimTable; }
 	FORCEINLINE int32 GetID() { return ID; }
 	FORCEINLINE int32 GetUserID() { return UserID; }
+
+	void SetUserID(int32 InUserID) { UserID = InUserID; };
 protected:
 	//服务器，同步
 	UFUNCTION(Server,Reliable)

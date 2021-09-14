@@ -7,40 +7,43 @@
 AMMOARPGGameState::AMMOARPGGameState()
 {
 	static ConstructorHelpers::FObjectFinder<UDataTable> CharacterAnimTable(
-		TEXT("/Game/DataTable/CharacterAnimTable.CharacterAnimTable"));
+		TEXT("/Game/DataTable/CharacterAnimTable"));
 	CharacterAnimTablePtr = CharacterAnimTable.Object;
+	static ConstructorHelpers::FObjectFinder<UDataTable> CharacterStyleTable(
+		TEXT("/Game/DataTable/CharacterStyleTable"));
+	CharacterStyleTablePtr = CharacterStyleTable.Object;
 }
 
 FCharacterAnimTable* AMMOARPGGameState::GetCharacterAnimTable(int32 InAnimTableID)
 {
-	if (TArray<FCharacterAnimTable*>* AnimTables = GetCharacterAnimTables())
-	{
-		if (AnimTables->Num())
-		{
-			if (auto Anim = AnimTables->FindByPredicate([&](FCharacterAnimTable* InAnimTable)
-				{
-					return InAnimTable->ID == InAnimTableID;
-				}))
-			{
-				return *Anim;
-			}
-		}
-	}
-	return NULL;
-	//return *(GetCharacterAnimTables()->FindByPredicate([&](FCharacterAnimTable* InAnimTable)
-	//	{
-	//		return InAnimTable->ID == InAnimTableID;
-	//	}));
+	return GetTable<FCharacterAnimTable>(
+		InAnimTableID,
+		CharacterAnimTablePtr,
+		CharacterAnimTables,
+		TEXT("AnimTable"));
 }
 
 TArray<FCharacterAnimTable*>* AMMOARPGGameState::GetCharacterAnimTables()
 {
-	if (!CharacterAnimTables.Num())
-	{
-		if (CharacterAnimTablePtr)
-		{
-			CharacterAnimTablePtr->GetAllRows(TEXT("AnimTable"), CharacterAnimTables);
-		}
-	}
-	return &CharacterAnimTables;
+	return GetTables<FCharacterAnimTable>(
+		CharacterAnimTablePtr,
+		CharacterAnimTables,
+		TEXT("AnimTable"));
+}
+
+FCharacterStyleTable* AMMOARPGGameState::GetCharacterStyleTable(int32 InStyleTableID)
+{
+	return GetTable<FCharacterStyleTable>(
+		InStyleTableID,
+		CharacterStyleTablePtr,
+		CharacterStyleTables,
+		TEXT("CharacterTable"));
+}
+
+TArray<FCharacterStyleTable*>* AMMOARPGGameState::GetCharacterStyleTables()
+{
+	return GetTables<FCharacterStyleTable>(
+		CharacterStyleTablePtr,
+		CharacterStyleTables,
+		TEXT("CharacterTable"));
 }

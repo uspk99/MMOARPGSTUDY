@@ -6,6 +6,7 @@
 #include "../MMOARPGGameMode.h"
 #include "ThreadManage.h"
 #include "../../../MMOARPGMacroType.h"
+#include "../MMOARPGPlayerState.h"
 
 void AMMOARPGPlayerCharacter::UpdateKneadingRequest()
 {
@@ -19,9 +20,19 @@ void AMMOARPGPlayerCharacter::UpdateKneadingRequest()
 	}
 }
 
-void AMMOARPGPlayerCharacter::CallUpdateKneadingBody_Implementation(const FMMOARPGCharacterAppearance& InCA)
+void AMMOARPGPlayerCharacter::CallUpdateKneadingBodyOnClient_Implementation(const FMMOARPGCharacterAppearance& InCA)
 {
 	UpdateKneadingBody(InCA);
+
+	if (GetLocalRole()==ENetRole::ROLE_AutonomousProxy)
+	{
+		if (AMMOARPGPlayerState* InState = GetPlayerState<AMMOARPGPlayerState>())
+		{
+			InState->GetCA() = InCA;//给客户端State赋值
+			UpdateKneadingBody(InState->GetCA());
+			
+		}	
+	}
 }
 
 void AMMOARPGPlayerCharacter::CallServerUpdateKneading_Implementation(int32 InUserID)

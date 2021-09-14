@@ -13,5 +13,10 @@ UCLASS()
 class MMOARPG_API AMMOARPGPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+public:
+	AMMOARPGPlayerController();
+
+	UFUNCTION(Server, Reliable)
+	void ReplaceCharacter(int32 InCharacterID);
 	
 };
