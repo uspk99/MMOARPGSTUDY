@@ -9,7 +9,9 @@
 
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
-	:bFight(false),ID(INDEX_NONE)
+	:ActionState(ECharacterActionState::NORMAL_STATE)
+	,LastActionState(ECharacterActionState::NORMAL_STATE)
+	,ID(INDEX_NONE)
 	,UserID(1)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -59,14 +61,17 @@ void AMMOARPGCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 }
 
-void AMMOARPGCharacterBase::OnRep_FightChanged()
+void AMMOARPGCharacterBase::OnRep_ActionStateChanged()
 {
 
 }
 
-void AMMOARPGCharacterBase::SwitchFightOnServer_Implementation(bool bNewFight)
+void AMMOARPGCharacterBase::SwitchActionStateOnServer_Implementation(ECharacterActionState InActionState)
 {
-	bFight = bNewFight;
+	//bFight = bNewFight;
+	ActionState = InActionState;
+
+	LastActionState = ActionState;
 }
 
 void AMMOARPGCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -74,7 +79,7 @@ void AMMOARPGCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	//更新变量   只更新模拟玩家
-	DOREPLIFETIME_CONDITION(AMMOARPGCharacterBase, bFight, COND_SimulatedOnly);
+	DOREPLIFETIME_CONDITION(AMMOARPGCharacterBase, ActionState, COND_SimulatedOnly);
 }
 
 void AMMOARPGCharacterBase::AnimSignal(int32 InSignal)

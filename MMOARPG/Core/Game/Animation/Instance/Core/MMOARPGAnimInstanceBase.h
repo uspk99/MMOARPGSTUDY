@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/Character.h"
+#include "MMOARPG/MMOARPGGameType.h"
 #include "MMOARPGAnimInstanceBase.generated.h"
 
 /**
@@ -32,8 +33,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		bool bInAir;
 
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
+	//	bool bFight;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-		bool bFight;
+	ECharacterActionState ActionState;
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "AnimAttrubute|FootIK")
 		bool bFootIK;

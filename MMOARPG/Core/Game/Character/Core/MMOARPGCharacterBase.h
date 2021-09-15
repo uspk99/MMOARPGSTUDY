@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "MMOARPG/DataTable/CharacterAnimTable.h"
 #include "CombatInterface/SimpleCombatInterface.h"
+#include "MMOARPG/MMOARPGGameType.h"
 #include "MMOARPGCharacterBase.generated.h"
 
 UCLASS()
@@ -20,7 +21,7 @@ public:
 
 	virtual void AnimSignal(int32 InSignal);
 public:
-	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent,DisplayName="AnimSignal",Category="AnimEcent")
+	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent,DisplayName="AnimSignal",Category="AnimEvent")
 	void K2_AnimSignal(int32 InSignal);
 
 protected:
@@ -35,7 +36,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	FORCEINLINE bool IsFight() { return bFight;}
+	FORCEINLINE ECharacterActionState GetActionState() { return ActionState;}
 
 	FORCEINLINE FCharacterAnimTable *GetAnimTable() { return AnimTable; }
 	FORCEINLINE int32 GetID() { return ID; }
@@ -45,14 +46,21 @@ public:
 protected:
 	//服务器，同步
 	UFUNCTION(Server,Reliable)
-	void SwitchFightOnServer(bool bNewFight);
+	void SwitchActionStateOnServer(ECharacterActionState InActionState);
 protected:
-	//更新
-	UPROPERTY(ReplicatedUsing = OnRep_FightChanged)
-	bool bFight;
+	////更新
+	//UPROPERTY(ReplicatedUsing = OnRep_FightChanged)
+	//bool bFight;
+
+	//动作状态
+	UPROPERTY(ReplicatedUsing = OnRep_ActionStateChanged)
+	ECharacterActionState ActionState;
+	//上一次动作
+	UPROPERTY()
+	ECharacterActionState LastActionState;
 
 	UFUNCTION()
-	virtual void OnRep_FightChanged();
+	virtual void OnRep_ActionStateChanged();
 
 	UPROPERTY(EditDefaultsOnly,Category="Character")
 	int32 ID;

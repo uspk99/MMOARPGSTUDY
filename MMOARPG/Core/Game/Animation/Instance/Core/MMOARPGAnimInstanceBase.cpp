@@ -9,12 +9,13 @@
 UMMOARPGAnimInstanceBase::UMMOARPGAnimInstanceBase()
 	:Speed(0.f),
 	bDeath(false),
-	bInAir(false),
-	bFight(false),
+	bInAir(false),	
 	bFootIK(false),
 	FootIKID(INDEX_NONE),
 	LeftBoneName(TEXT("foot_l")),
-	RightBoneName(TEXT("foot_r"))
+	RightBoneName(TEXT("foot_r")),
+	ActionState(ECharacterActionState::NORMAL_STATE)
+	//bFight(false),
 {
 
 }
@@ -42,7 +43,8 @@ void UMMOARPGAnimInstanceBase::NativeUpdateAnimation(float DeltaSeconds)
 		//更新速度
 		Speed = InCharacterBase->GetVelocity().Size();
 		bInAir = InCharacterBase->GetMovementComponent()->IsFalling();
-		bFight = InCharacterBase->IsFight();
+		//bFight = InCharacterBase->GetActionState();
+		ActionState = InCharacterBase->GetActionState();
 	}
 
 	if (bFootIK&& FootIKID!=INDEX_NONE)

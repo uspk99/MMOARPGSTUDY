@@ -70,7 +70,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 
-	virtual void OnRep_FightChanged();
+	virtual void OnRep_ActionStateChanged();
 	void FightChanged();
 
 public:

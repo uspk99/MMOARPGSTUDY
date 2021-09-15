@@ -108,18 +108,20 @@ void AMMOARPGCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector InLo
 
 void AMMOARPGCharacter::SwitchFight()
 {
-	if (bFight)
+	if (ActionState==ECharacterActionState::NORMAL_STATE)
 	{
-		bFight = false;
+		ActionState = ECharacterActionState::FIGHT_STATE;
 	}
-	else
+	else if (ActionState == ECharacterActionState::FIGHT_STATE)
 	{
-		bFight = true;
+		ActionState = ECharacterActionState::NORMAL_STATE;
 	}
 	//客户端播放
 	FightChanged();
 	//通知服务器
-	SwitchFightOnServer(bFight);
+	SwitchActionStateOnServer(ActionState);
+
+	LastActionState = ActionState;
 }
 
 void AMMOARPGCharacter::TurnAtRate(float Rate)
@@ -170,14 +172,21 @@ void AMMOARPGCharacter::FightChanged()
 		if (InAnimTable->SwitchFightMontage)
 		{
 			PlayAnimMontage(InAnimTable->SwitchFightMontage, 1.f,
-				bFight == true ? TEXT("0") : TEXT("1"));
+				ActionState == ECharacterActionState::FIGHT_STATE ? TEXT("0") : TEXT("1"));
 		}
 	}
 }
-void AMMOARPGCharacter::OnRep_FightChanged()
+void AMMOARPGCharacter::OnRep_ActionStateChanged()
 {
 	if (GetLocalRole() != ROLE_Authority)
 	{
-		FightChanged();
+		//切换
+		if (ActionState==ECharacterActionState::FIGHT_STATE||
+			LastActionState == ECharacterActionState::FIGHT_STATE)
+		{
+			FightChanged();
+		}
+		//收尾
+		LastActionState = ActionState;	
 	}
 }
