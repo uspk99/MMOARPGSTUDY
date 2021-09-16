@@ -66,12 +66,24 @@ protected:
 
 	void SwitchFight();
 
+	UFUNCTION(Server,Reliable)
 	void Fly();
+	//·þÎñÆ÷¹ã²¥
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastFly();
 
+	UFUNCTION(Server, Reliable)
 	void Fast();
-
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastFast();
+	UFUNCTION(Server, Reliable)
 	void DodgeLeft();
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastDodgeLeft();
+	UFUNCTION(Server, Reliable)
 	void DodgeRight();
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastDodgeRight();
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

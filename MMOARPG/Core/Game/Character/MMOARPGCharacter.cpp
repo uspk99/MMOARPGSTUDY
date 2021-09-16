@@ -127,22 +127,28 @@ void AMMOARPGCharacter::SwitchFight()
 }
 
 
-void AMMOARPGCharacter::Fly()
+void AMMOARPGCharacter::Fly_Implementation()
+{
+	MulticastFly();
+}
+
+void AMMOARPGCharacter::MulticastFly_Implementation()
 {
 	ResetActionState(ECharacterActionState::FLIGHT_STATE);
 	GetFlyComponent()->ResetFly();
 }
 
-
-void AMMOARPGCharacter::Fast()
+void AMMOARPGCharacter::Fast_Implementation()
+{
+	MulticastFast();
+}
+void AMMOARPGCharacter::MulticastFast_Implementation()
 {
 	if (ActionState == ECharacterActionState::FLIGHT_STATE)
 	{
 		GetFlyComponent()->ResetFastFly();
 	}
-	
 }
-
 
 void AMMOARPGCharacter::TurnAtRate(float Rate)
 {
@@ -207,7 +213,12 @@ void AMMOARPGCharacter::FightChanged()
 	}
 }
 
-void AMMOARPGCharacter::DodgeLeft()
+void AMMOARPGCharacter::DodgeLeft_Implementation()
+{
+	MulticastDodgeLeft();
+
+}
+void AMMOARPGCharacter::MulticastDodgeLeft_Implementation()
 {
 	if (ActionState == ECharacterActionState::FLIGHT_STATE)
 	{
@@ -215,8 +226,11 @@ void AMMOARPGCharacter::DodgeLeft()
 	}
 }
 
-
-void AMMOARPGCharacter::DodgeRight()
+void AMMOARPGCharacter::DodgeRight_Implementation()
+{
+	MulticastDodgeRight();
+}
+void AMMOARPGCharacter::MulticastDodgeRight_Implementation()
 {
 	if (ActionState == ECharacterActionState::FLIGHT_STATE)
 	{

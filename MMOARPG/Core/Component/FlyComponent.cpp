@@ -104,59 +104,66 @@ void UFlyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	{
 		if (MMOARPGCharacterBase->GetActionState() == ECharacterActionState::FLIGHT_STATE)
 		{
-			if (!bLand)
+			//模拟玩家不计算
+			if (MMOARPGCharacterBase->GetLocalRole()==ENetRole::ROLE_Authority||
+				MMOARPGCharacterBase->GetLocalRole()==ENetRole::ROLE_AutonomousProxy)
 			{
-				//角色旋转
+				if (!bLand)
 				{
-					//相机和胶囊体旋转
-					FRotator CameraRotator = CameraComponent->GetComponentRotation();
-					FRotator CapsuleRotator = CapsuleComponent->GetComponentRotation();
-					//修正Pitch
-					if (!bFastFly)
+					//角色旋转
 					{
-						CameraRotator.Pitch = 0.f;
-					}
-					//根据速度转向
-					FRotator NewRot = FMath::RInterpTo(CapsuleRotator, CameraRotator,DeltaTime,8.f);
-					MMOARPGCharacterBase->SetActorRotation(NewRot);
-				}		
-				{
-					if (1)
-					{//帧
-						float PreFPS = 1.f / DeltaTime;
-						FRotator NewDeltaTimeRot = MMOARPGCharacterBase->GetActorRotation() - LastRotator;
-						NewDeltaTimeRot *= PreFPS;
+						//相机和胶囊体旋转
+						FRotator CameraRotator = CameraComponent->GetComponentRotation();
+						FRotator CapsuleRotator = CapsuleComponent->GetComponentRotation();
+						//修正Pitch
+						if (!bFastFly)
+						{
+							CameraRotator.Pitch = 0.f;
+						}
+						//根据速度转向
+						FRotator NewRot = FMath::RInterpTo(CapsuleRotator, CameraRotator,DeltaTime,8.f);
+						MMOARPGCharacterBase->SetActorRotation(NewRot);
+					}		
+					{
+						if (1)
+						{//帧
+							float PreFPS = 1.f / DeltaTime;
+							FRotator NewDeltaTimeRot = MMOARPGCharacterBase->GetActorRotation() - LastRotator;
+							NewDeltaTimeRot *= PreFPS;
 
-						FVector PhysicsAngularVelocityInDegrees;
-						Print(DeltaTime, PhysicsAngularVelocityInDegrees.ToString());
-						RotationRate.X = FMath::GetMappedRangeValueClamped(
-							FVector2D(-360.f, 360.f),
-							FVector2D(-1.f, 1.f),
-							NewDeltaTimeRot.Yaw);
+							FVector PhysicsAngularVelocityInDegrees;
+							Print(DeltaTime, PhysicsAngularVelocityInDegrees.ToString());
+							RotationRate.X = FMath::GetMappedRangeValueClamped(
+								FVector2D(-360.f, 360.f),
+								FVector2D(-1.f, 1.f),
+								NewDeltaTimeRot.Yaw);
 
-						RotationRate.Y= FMath::GetMappedRangeValueClamped(
-							FVector2D(-360.f, 360.f),
-							FVector2D(-1.f, 1.f),
-							NewDeltaTimeRot.Pitch);
+							RotationRate.Y= FMath::GetMappedRangeValueClamped(
+								FVector2D(-360.f, 360.f),
+								FVector2D(-1.f, 1.f),
+								NewDeltaTimeRot.Pitch);
 
-						LastRotator = MMOARPGCharacterBase->GetActorRotation();
-					}
-					else
-					{//角速度
-						//返回pitch yaw roll
-						FVector PhysicsAngularVelocityInDegrees = CapsuleComponent->GetPhysicsAngularVelocityInDegrees();
-						RotationRate.X = FMath::GetMappedRangeValueClamped(
-							 FVector2D(-360.f, 360.f),
-							 FVector2D(-1.f, 1.f), 
-							 PhysicsAngularVelocityInDegrees.Z);
+							LastRotator = MMOARPGCharacterBase->GetActorRotation();
+						}
+						else
+						{//角速度
+							//返回pitch yaw roll
+							FVector PhysicsAngularVelocityInDegrees = CapsuleComponent->GetPhysicsAngularVelocityInDegrees();
+							RotationRate.X = FMath::GetMappedRangeValueClamped(
+								 FVector2D(-360.f, 360.f),
+								 FVector2D(-1.f, 1.f), 
+								 PhysicsAngularVelocityInDegrees.Z);
 
-						RotationRate.Y = FMath::GetMappedRangeValueClamped(
-							FVector2D(-360.f, 360.f),
-							FVector2D(-1.f, 1.f),
-							PhysicsAngularVelocityInDegrees.Y);
+							RotationRate.Y = FMath::GetMappedRangeValueClamped(
+								FVector2D(-360.f, 360.f),
+								FVector2D(-1.f, 1.f),
+								PhysicsAngularVelocityInDegrees.Y);
+						}
 					}
 				}
+
 			}
+
 		}
 		
 		//Dodge飞行计时,并重置
