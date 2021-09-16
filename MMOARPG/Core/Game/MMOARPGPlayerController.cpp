@@ -42,8 +42,6 @@ void AMMOARPGPlayerController::ReplaceCharacter_Implementation(int32 InCharacter
 						InPlayerCharacter->CallUpdateKneadingBodyOnClient(InPlayerState->GetCA());
 					}
 				}
-
-
 				APawn* InPawn = GetPawn();
 				//¸Ä½ÇÉ«
 				OnPossess(InNewCharacter);

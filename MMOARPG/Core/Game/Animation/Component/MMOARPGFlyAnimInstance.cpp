@@ -7,6 +7,13 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "../../../Component/FlyComponent.h"
 
+UMMOARPGFlyAnimInstance::UMMOARPGFlyAnimInstance()
+	:Super()
+	,DodgeFly(EDodgeFly::DODGE_NONE)
+{
+
+}
+
 void UMMOARPGFlyAnimInstance::InitAnimInstance(ACharacter* InCharacter)
 {
 	Super::InitAnimInstance(InCharacter);
@@ -40,8 +47,10 @@ void UMMOARPGFlyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			FlySpeed.Z = FMath::GetMappedRangeValueClamped(FVector2D(-MaxFSpeed, MaxFSpeed),
 				FVector2D(-1.f, 1.f), SpeedVector.Z);
 		}
-
+		//¹ØÁªÊôÐÔ
 		RotationRate =InCharacterBase->GetFlyComponent()->RotationRate;
-		bFastFly = InCharacterBase->GetFlyComponent()->bFastFly;
+		bFastFly = *InCharacterBase->GetFlyComponent()->bFastFly;
+		DodgeFly = InCharacterBase->GetFlyComponent()->DodgeFly;
+		bLand = *InCharacterBase->GetFlyComponent()->bLand;
 	}
 }

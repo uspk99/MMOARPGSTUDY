@@ -12,8 +12,19 @@ UFlyComponent::UFlyComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	bFastFly = false;
+	//bFastFly = false;
+	//DodgeTime = 0.f;
 	// ...
+	bFastFly.Fun.BindLambda([&]() { DodgeFly = EDodgeFly::DODGE_NONE; });
+
+	//登陆之后回到地面
+	bLand.Fun.BindLambda([&]()
+		{
+			if (MMOARPGCharacterBase.IsValid())
+			{
+				MMOARPGCharacterBase->ResetActionState(ECharacterActionState::FLIGHT_STATE);
+				ResetFly();
+			}});
 }
 
 
@@ -27,12 +38,49 @@ void UFlyComponent::BeginPlay()
 		CharacterMovementComponent = Cast<UCharacterMovementComponent>(MMOARPGCharacterBase->GetMovementComponent());
 		CapsuleComponent = (MMOARPGCharacterBase->GetCapsuleComponent());
 		CameraComponent = MMOARPGCharacterBase->GetFollowCamera();
+
+		if (CharacterMovementComponent.IsValid())
+		{
+			//最大加速度
+			CharacterMovementComponent->MaxAcceleration = 2500.f;
+			//飞行减速
+			CharacterMovementComponent->BrakingDecelerationFlying = 1400.f;
+		}
+		//落地代理
+		//MMOARPGCharacterBase->LandedDelegate.AddDynamic(this, &UFlyComponent::Landed);
+		CapsuleComponent->OnComponentHit.AddDynamic(this, &UFlyComponent::Landed);
 	}
 
 	// ...
 
 }
 
+void UFlyComponent::Landed(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (MMOARPGCharacterBase.IsValid())
+	{
+		if (MMOARPGCharacterBase->GetActionState()==ECharacterActionState::FLIGHT_STATE
+			&&bFastFly)
+		{
+			//点乘
+			float CosValue =
+			FVector::DotProduct(CapsuleComponent->GetForwardVector(),Hit.ImpactNormal);
+			
+			float CosAngle = (180.f)/PI* FMath::Acos(CosValue);
+			//角度
+			if (CosAngle>=125.f)
+			{
+				//是否地面而非山脉
+				if (Hit.ImpactNormal.Z>0.5f)
+				{
+					Reset();
+					bLand = true;
+					bLand = 1.6f;
+				}
+			}	
+		}
+	}
+}
 
 void UFlyComponent::Print(float InTime, const FString& InString)
 {
@@ -56,59 +104,67 @@ void UFlyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	{
 		if (MMOARPGCharacterBase->GetActionState() == ECharacterActionState::FLIGHT_STATE)
 		{
-			//角色旋转
+			if (!bLand)
 			{
-				//相机和胶囊体旋转
-				FRotator CameraRotator = CameraComponent->GetComponentRotation();
-				FRotator CapsuleRotator = CapsuleComponent->GetComponentRotation();
-				//修正Pitch
-				if (!bFastFly)
+				//角色旋转
 				{
-					CameraRotator.Pitch = 0.f;
-				}
-				//根据速度转向
-				FRotator NewRot = FMath::RInterpTo(CapsuleRotator, CameraRotator,DeltaTime,8.f);
-				MMOARPGCharacterBase->SetActorRotation(NewRot);
-			}		
-			{
-				if (1)
-				{//帧
-					float PreFPS = 1.f / DeltaTime;
-					FRotator NewDeltaTimeRot = MMOARPGCharacterBase->GetActorRotation() - LastRotator;
-					NewDeltaTimeRot *= PreFPS;
+					//相机和胶囊体旋转
+					FRotator CameraRotator = CameraComponent->GetComponentRotation();
+					FRotator CapsuleRotator = CapsuleComponent->GetComponentRotation();
+					//修正Pitch
+					if (!bFastFly)
+					{
+						CameraRotator.Pitch = 0.f;
+					}
+					//根据速度转向
+					FRotator NewRot = FMath::RInterpTo(CapsuleRotator, CameraRotator,DeltaTime,8.f);
+					MMOARPGCharacterBase->SetActorRotation(NewRot);
+				}		
+				{
+					if (1)
+					{//帧
+						float PreFPS = 1.f / DeltaTime;
+						FRotator NewDeltaTimeRot = MMOARPGCharacterBase->GetActorRotation() - LastRotator;
+						NewDeltaTimeRot *= PreFPS;
 
-					FVector PhysicsAngularVelocityInDegrees;
-					Print(DeltaTime, PhysicsAngularVelocityInDegrees.ToString());
-					RotationRate.X = FMath::GetMappedRangeValueClamped(
-						FVector2D(-360.f, 360.f),
-						FVector2D(-1.f, 1.f),
-						NewDeltaTimeRot.Yaw);
+						FVector PhysicsAngularVelocityInDegrees;
+						Print(DeltaTime, PhysicsAngularVelocityInDegrees.ToString());
+						RotationRate.X = FMath::GetMappedRangeValueClamped(
+							FVector2D(-360.f, 360.f),
+							FVector2D(-1.f, 1.f),
+							NewDeltaTimeRot.Yaw);
 
-					RotationRate.Y= FMath::GetMappedRangeValueClamped(
-						FVector2D(-360.f, 360.f),
-						FVector2D(-1.f, 1.f),
-						NewDeltaTimeRot.Pitch);
+						RotationRate.Y= FMath::GetMappedRangeValueClamped(
+							FVector2D(-360.f, 360.f),
+							FVector2D(-1.f, 1.f),
+							NewDeltaTimeRot.Pitch);
 
-					LastRotator = MMOARPGCharacterBase->GetActorRotation();
-				}
-				else
-				{//角速度
-					//返回pitch yaw roll
-					FVector PhysicsAngularVelocityInDegrees = CapsuleComponent->GetPhysicsAngularVelocityInDegrees();
-					RotationRate.X = FMath::GetMappedRangeValueClamped(
-						 FVector2D(-360.f, 360.f),
-						 FVector2D(-1.f, 1.f), 
-						 PhysicsAngularVelocityInDegrees.Z);
+						LastRotator = MMOARPGCharacterBase->GetActorRotation();
+					}
+					else
+					{//角速度
+						//返回pitch yaw roll
+						FVector PhysicsAngularVelocityInDegrees = CapsuleComponent->GetPhysicsAngularVelocityInDegrees();
+						RotationRate.X = FMath::GetMappedRangeValueClamped(
+							 FVector2D(-360.f, 360.f),
+							 FVector2D(-1.f, 1.f), 
+							 PhysicsAngularVelocityInDegrees.Z);
 
-					RotationRate.Y = FMath::GetMappedRangeValueClamped(
-						FVector2D(-360.f, 360.f),
-						FVector2D(-1.f, 1.f),
-						PhysicsAngularVelocityInDegrees.Y);
+						RotationRate.Y = FMath::GetMappedRangeValueClamped(
+							FVector2D(-360.f, 360.f),
+							FVector2D(-1.f, 1.f),
+							PhysicsAngularVelocityInDegrees.Y);
+					}
 				}
 			}
 		}
-	}
+		
+		//Dodge飞行计时,并重置
+		bFastFly.Tick(DeltaTime);
 
+		//着地计时
+		bLand.Tick(DeltaTime);
+	}
 }
 
 void UFlyComponent::ResetFly()
@@ -123,18 +179,24 @@ void UFlyComponent::ResetFly()
 		}
 		else
 		{
-			CharacterMovementComponent->MaxFlySpeed = 600.f;
-			CharacterMovementComponent->bOrientRotationToMovement = true;
-			CharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
-
-			//回调俯仰角
-			FRotator NewRot = MMOARPGCharacterBase->GetActorRotation();
-			NewRot.Pitch = 0.f;
-			MMOARPGCharacterBase->SetActorRotation(NewRot);
+			Reset();
 		}
 		
 		bFastFly = false;
 	}
+}
+void UFlyComponent::Reset()
+{
+
+	CharacterMovementComponent->MaxFlySpeed = 600.f;
+	CharacterMovementComponent->bOrientRotationToMovement = true;
+	CharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+
+	//回调俯仰角
+	FRotator NewRot = MMOARPGCharacterBase->GetActorRotation();
+	NewRot.Pitch = 0.f;
+	MMOARPGCharacterBase->SetActorRotation(NewRot);
+
 }
 
 void UFlyComponent::ResetFastFly()
@@ -154,6 +216,17 @@ void UFlyComponent::ResetFastFly()
 	}
 
 }
+
+void UFlyComponent::ResetDodgeFly(EDodgeFly InDodgeFly)
+{
+	if (bFastFly)
+	{
+		bFastFly = 1.6f;
+		DodgeFly = InDodgeFly;
+		//DodgeTime = 1.6f;
+	}
+}
+
 
 void UFlyComponent::FlyForwardAxis(float InAxisValue)
 {

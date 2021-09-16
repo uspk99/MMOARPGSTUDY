@@ -70,6 +70,8 @@ protected:
 
 	void Fast();
 
+	void DodgeLeft();
+	void DodgeRight();
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

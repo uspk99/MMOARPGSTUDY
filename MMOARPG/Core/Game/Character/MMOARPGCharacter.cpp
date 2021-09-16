@@ -66,6 +66,10 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAction("Fly", IE_Pressed, this, &AMMOARPGCharacter::Fly);
 	PlayerInputComponent->BindAction("Fast", IE_Pressed, this, &AMMOARPGCharacter::Fast);
 
+
+	PlayerInputComponent->BindAction("DodgeLeft", IE_Pressed, this, &AMMOARPGCharacter::DodgeLeft);
+	PlayerInputComponent->BindAction("DodgeRight", IE_Pressed, this, &AMMOARPGCharacter::DodgeRight);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMMOARPGCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMMOARPGCharacter::MoveRight);
 
@@ -202,6 +206,24 @@ void AMMOARPGCharacter::FightChanged()
 		}
 	}
 }
+
+void AMMOARPGCharacter::DodgeLeft()
+{
+	if (ActionState == ECharacterActionState::FLIGHT_STATE)
+	{
+		GetFlyComponent()->ResetDodgeFly(EDodgeFly::DODGE_LEFT);
+	}
+}
+
+
+void AMMOARPGCharacter::DodgeRight()
+{
+	if (ActionState == ECharacterActionState::FLIGHT_STATE)
+	{
+		GetFlyComponent()->ResetDodgeFly(EDodgeFly::DODGE_RIGHT);
+	}
+}
+
 void AMMOARPGCharacter::OnRep_ActionStateChanged()
 {
 	if (GetLocalRole() != ROLE_Authority)

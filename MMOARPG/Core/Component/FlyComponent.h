@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "UObject/WeakObjectPtrTemplates.h"
+#include "../../MMOARPGGameType.h"
 #include "FlyComponent.generated.h"
 
 class AMMOARPGCharacterBase;
@@ -20,8 +21,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		FVector2D RotationRate;
 
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
+	//	bool bFastFly;
+
+	FResultBool bFastFly;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-		bool bFastFly;
+		EDodgeFly DodgeFly;
+
+		FResultBool bLand;
 public:	
 	// Sets default values for this component's properties
 	UFlyComponent();
@@ -32,12 +40,18 @@ protected:
 
 	void Print(float InTime, const FString& InString);
 
+	void Reset();
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void FlyForwardAxis(float InAxisValue);
 	void ResetFly();
 	void ResetFastFly();
+
+	void ResetDodgeFly(EDodgeFly InDodgeFly);
+
+	UFUNCTION()
+	void Landed(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<AMMOARPGCharacterBase> MMOARPGCharacterBase;
@@ -48,7 +62,9 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<UCameraComponent>  CameraComponent;
 
-
 	UPROPERTY()
 	FRotator LastRotator;
+protected:
+	//UPROPERTY()
+	//float DodgeTime;
 };
