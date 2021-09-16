@@ -12,9 +12,9 @@ UMMOARPGAnimInstanceBase::UMMOARPGAnimInstanceBase()
 	bInAir(false),	
 	bFootIK(false),
 	FootIKID(INDEX_NONE),
+	ActionState(ECharacterActionState::NORMAL_STATE),
 	LeftBoneName(TEXT("foot_l")),
-	RightBoneName(TEXT("foot_r")),
-	ActionState(ECharacterActionState::NORMAL_STATE)
+	RightBoneName(TEXT("foot_r"))
 	//bFight(false),
 {
 

@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "../../Component/FlyComponent.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 // AMMOARPGCharacter
@@ -61,6 +63,8 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("SwitchFight", IE_Pressed, this, &AMMOARPGCharacter::SwitchFight);
+	PlayerInputComponent->BindAction("Fly", IE_Pressed, this, &AMMOARPGCharacter::Fly);
+	PlayerInputComponent->BindAction("Fast", IE_Pressed, this, &AMMOARPGCharacter::Fast);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMMOARPGCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMMOARPGCharacter::MoveRight);
@@ -108,14 +112,8 @@ void AMMOARPGCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector InLo
 
 void AMMOARPGCharacter::SwitchFight()
 {
-	if (ActionState==ECharacterActionState::NORMAL_STATE)
-	{
-		ActionState = ECharacterActionState::FIGHT_STATE;
-	}
-	else if (ActionState == ECharacterActionState::FIGHT_STATE)
-	{
-		ActionState = ECharacterActionState::NORMAL_STATE;
-	}
+	//客户端
+	ResetActionState(ECharacterActionState::FIGHT_STATE);
 	//客户端播放
 	FightChanged();
 	//通知服务器
@@ -123,6 +121,24 @@ void AMMOARPGCharacter::SwitchFight()
 
 	LastActionState = ActionState;
 }
+
+
+void AMMOARPGCharacter::Fly()
+{
+	ResetActionState(ECharacterActionState::FLIGHT_STATE);
+	GetFlyComponent()->ResetFly();
+}
+
+
+void AMMOARPGCharacter::Fast()
+{
+	if (ActionState == ECharacterActionState::FLIGHT_STATE)
+	{
+		GetFlyComponent()->ResetFastFly();
+	}
+	
+}
+
 
 void AMMOARPGCharacter::TurnAtRate(float Rate)
 {
@@ -138,15 +154,25 @@ void AMMOARPGCharacter::LookUpAtRate(float Rate)
 
 void AMMOARPGCharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f))
+	//if ((Controller != nullptr) && (Value != 0.0f))
+	if ((Controller != nullptr))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		if (ActionState==ECharacterActionState::FLIGHT_STATE)
+		{
+			GetFlyComponent()->FlyForwardAxis(Value);
+		}
+		else
+		{
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
+
+
 	}
 }
 

@@ -7,14 +7,21 @@
 #include "MMOARPG/DataTable/CharacterAnimTable.h"
 #include "CombatInterface/SimpleCombatInterface.h"
 #include "MMOARPG/MMOARPGGameType.h"
+#include "UObject/ObjectPtr.h"
 #include "MMOARPGCharacterBase.generated.h"
 
+
+class UFlyComponent;
 UCLASS()
 class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombatInterface
 {
 	GENERATED_BODY()
 		
 	friend class AMMOARPGGameMode;
+
+	UPROPERTY()
+	TObjectPtr<UFlyComponent> FlyComponent;
+
 public:
 	// Sets default values for this character's properties
 	AMMOARPGCharacterBase();
@@ -42,7 +49,13 @@ public:
 	FORCEINLINE int32 GetID() { return ID; }
 	FORCEINLINE int32 GetUserID() { return UserID; }
 
+	FORCEINLINE UFlyComponent* GetFlyComponent() { return FlyComponent; }
+
 	void SetUserID(int32 InUserID) { UserID = InUserID; };
+
+	void ResetActionState(ECharacterActionState InActionState);
+
+	virtual class UCameraComponent* GetFollowCamera() const { return NULL; }
 protected:
 	//服务器，同步
 	UFUNCTION(Server,Reliable)

@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "../../Animation/Instance/Core/MMOARPGAnimInstanceBase.h"
 #include "../../../../MMOARPGGameInstance.h"
+#include "MMOARPG/Core/Component/FlyComponent.h"
 
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
@@ -16,6 +17,9 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	FlyComponent = CreateDefaultSubobject<UFlyComponent>(TEXT("FlyComponent"));
+	//FlyComponent->SetupAttachment(RootComponent);
 
 }
 
@@ -59,6 +63,19 @@ void AMMOARPGCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AMMOARPGCharacterBase::ResetActionState(ECharacterActionState InActionState)
+{
+	//¿Í»§¶Ë
+	if (ActionState== InActionState)
+	{
+		ActionState = ECharacterActionState::NORMAL_STATE;
+	}
+	else
+	{
+		ActionState = InActionState;
+	}
 }
 
 void AMMOARPGCharacterBase::OnRep_ActionStateChanged()
