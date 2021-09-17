@@ -3,35 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../Instance/Core/MMOARPGAnimInstanceBase.h"
-#include "../../../../MMOARPGGameType.h"
-#include "Core/AnimInstanceComponentBase.h"
-#include "MMOARPGFlyAnimInstance.generated.h"
+#include "../../Instance/Core/MMOARPGAnimInstanceBase.h"
+#include "AnimInstanceComponentBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MMOARPG_API UMMOARPGFlyAnimInstance : public UAnimInstanceComponentBase
+class MMOARPG_API UAnimInstanceComponentBase : public UMMOARPGAnimInstanceBase
 {
 	GENERATED_BODY()
-		UMMOARPGFlyAnimInstance();
 
+public:
+		UAnimInstanceComponentBase();
 		virtual void InitAnimInstance(ACharacter* InCharacter);
 
 	//初始化与更新
 	virtual void NativeInitializeAnimation();
 	virtual void NativeUpdateAnimation(float DeltaSeconds);
 public:
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
+		FVector AxisSpeed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-		bool bFastFly;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-		bool bLand;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-		EDodgeFly DodgeFly;
-
+		FVector2D RotationRate;
 };

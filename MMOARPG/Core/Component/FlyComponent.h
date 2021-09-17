@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "UObject/WeakObjectPtrTemplates.h"
 #include "../../MMOARPGGameType.h"
+#include "Core/MotionComponent.h"
 #include "FlyComponent.generated.h"
 
 class AMMOARPGCharacterBase;
@@ -13,7 +14,7 @@ class UCharacterMovementComponent;
 class UCapsuleComponent;
 class UCameraComponent;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class MMOARPG_API UFlyComponent : public UActorComponent
+class MMOARPG_API UFlyComponent : public UMotionComponent
 {
 	GENERATED_BODY()
 
@@ -52,18 +53,6 @@ public:
 
 	UFUNCTION()
 	void Landed(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-protected:
-	UPROPERTY()
-	TWeakObjectPtr<AMMOARPGCharacterBase> MMOARPGCharacterBase;
-	UPROPERTY()
-	TWeakObjectPtr<UCharacterMovementComponent>  CharacterMovementComponent;
-	UPROPERTY()
-	TWeakObjectPtr<UCapsuleComponent>  CapsuleComponent;
-	UPROPERTY()
-	TWeakObjectPtr<UCameraComponent>  CameraComponent;
-
-	UPROPERTY()
-	FRotator LastRotator;
 protected:
 	//UPROPERTY()
 	//float DodgeTime;

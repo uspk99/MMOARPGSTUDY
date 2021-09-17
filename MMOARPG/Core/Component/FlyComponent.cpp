@@ -15,16 +15,6 @@ UFlyComponent::UFlyComponent()
 	//bFastFly = false;
 	//DodgeTime = 0.f;
 	// ...
-	bFastFly.Fun.BindLambda([&]() { DodgeFly = EDodgeFly::DODGE_NONE; });
-
-	//登陆之后回到地面
-	bLand.Fun.BindLambda([&]()
-		{
-			if (MMOARPGCharacterBase.IsValid())
-			{
-				MMOARPGCharacterBase->ResetActionState(ECharacterActionState::FLIGHT_STATE);
-				ResetFly();
-			}});
 }
 
 
@@ -32,13 +22,9 @@ UFlyComponent::UFlyComponent()
 void UFlyComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	MMOARPGCharacterBase = Cast<AMMOARPGCharacterBase>(GetOwner());
+
 	if (MMOARPGCharacterBase.IsValid())
 	{
-		CharacterMovementComponent = Cast<UCharacterMovementComponent>(MMOARPGCharacterBase->GetMovementComponent());
-		CapsuleComponent = (MMOARPGCharacterBase->GetCapsuleComponent());
-		CameraComponent = MMOARPGCharacterBase->GetFollowCamera();
-
 		if (CharacterMovementComponent.IsValid())
 		{
 			//最大加速度
@@ -48,11 +34,20 @@ void UFlyComponent::BeginPlay()
 		}
 		//落地代理
 		//MMOARPGCharacterBase->LandedDelegate.AddDynamic(this, &UFlyComponent::Landed);
-		CapsuleComponent->OnComponentHit.AddDynamic(this, &UFlyComponent::Landed);
+		if (CapsuleComponent.IsValid())
+		{
+			CapsuleComponent->OnComponentHit.AddDynamic(this, &UFlyComponent::Landed);
+		}
+		bFastFly.Fun.BindLambda([&]() { DodgeFly = EDodgeFly::DODGE_NONE; });
+		//登陆之后回到地面
+		bLand.Fun.BindLambda([&]()
+			{
+				if (MMOARPGCharacterBase.IsValid())
+				{
+					MMOARPGCharacterBase->ResetActionState(ECharacterActionState::FLIGHT_STATE);
+					ResetFly();
+				}});
 	}
-
-	// ...
-
 }
 
 void UFlyComponent::Landed(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

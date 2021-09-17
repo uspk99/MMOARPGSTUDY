@@ -7,6 +7,7 @@
 #include "../../Animation/Instance/Core/MMOARPGAnimInstanceBase.h"
 #include "../../../../MMOARPGGameInstance.h"
 #include "MMOARPG/Core/Component/FlyComponent.h"
+#include "../../../../Core/Component/SwimmingComponent.h"
 
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
@@ -19,6 +20,7 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	FlyComponent = CreateDefaultSubobject<UFlyComponent>(TEXT("FlyComponent"));
+	SwimmingComponent = CreateDefaultSubobject<USwimmingComponent>(TEXT("SwimmingComponent"));
 	//FlyComponent->SetupAttachment(RootComponent);
 
 }

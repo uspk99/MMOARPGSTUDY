@@ -12,6 +12,7 @@
 
 
 class UFlyComponent;
+class USwimmingComponent;
 UCLASS()
 class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombatInterface
 {
@@ -21,6 +22,9 @@ class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombat
 
 	UPROPERTY()
 	TObjectPtr<UFlyComponent> FlyComponent;
+
+	UPROPERTY()
+		TObjectPtr<USwimmingComponent>SwimmingComponent;
 
 public:
 	// Sets default values for this character's properties
@@ -50,6 +54,7 @@ public:
 	FORCEINLINE int32 GetUserID() { return UserID; }
 
 	FORCEINLINE UFlyComponent* GetFlyComponent() { return FlyComponent; }
+	FORCEINLINE USwimmingComponent* GetSwimmingComponent() { return SwimmingComponent; }
 
 	void SetUserID(int32 InUserID) { UserID = InUserID; };
 
