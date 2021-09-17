@@ -19,13 +19,9 @@ class MMOARPG_API UFlyComponent : public UMotionComponent
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-		FVector2D RotationRate;
 
 	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-	//	bool bFastFly;
-
-	FResultBool bFastFly;
+	//	bool bFast;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		EDodgeFly DodgeFly;
@@ -38,8 +34,6 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-	void Print(float InTime, const FString& InString);
 
 	void Reset();
 public:	

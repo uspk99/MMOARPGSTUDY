@@ -27,4 +27,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		FVector2D RotationRate;
+protected:
+	void ResetAxisSpeed(float NewSpeed);
 };

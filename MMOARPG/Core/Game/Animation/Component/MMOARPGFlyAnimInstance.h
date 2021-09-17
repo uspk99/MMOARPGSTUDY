@@ -25,13 +25,14 @@ class MMOARPG_API UMMOARPGFlyAnimInstance : public UAnimInstanceComponentBase
 public:
 
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
-		bool bFastFly;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		bool bLand;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		EDodgeFly DodgeFly;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
+		bool bFast;
 
 };

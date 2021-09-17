@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "../../Component/FlyComponent.h"
+#include "../../Component/SwimmingComponent.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -63,9 +64,9 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("SwitchFight", IE_Pressed, this, &AMMOARPGCharacter::SwitchFight);
-	PlayerInputComponent->BindAction("Fly", IE_Pressed, this, &AMMOARPGCharacter::Fly);
+	PlayerInputComponent->BindAction("ActionSwitch", IE_Pressed, this, &AMMOARPGCharacter::ActionSwitch);
 	PlayerInputComponent->BindAction("Fast", IE_Pressed, this, &AMMOARPGCharacter::Fast);
-
+	PlayerInputComponent->BindAction("Fast", IE_Released, this, &AMMOARPGCharacter::FastReleased);
 
 	PlayerInputComponent->BindAction("DodgeLeft", IE_Pressed, this, &AMMOARPGCharacter::DodgeLeft);
 	PlayerInputComponent->BindAction("DodgeRight", IE_Pressed, this, &AMMOARPGCharacter::DodgeRight);
@@ -127,15 +128,28 @@ void AMMOARPGCharacter::SwitchFight()
 }
 
 
-void AMMOARPGCharacter::Fly_Implementation()
+void AMMOARPGCharacter::ActionSwitch_Implementation()
 {
-	MulticastFly();
+	MulticastActionSwitch();
 }
 
-void AMMOARPGCharacter::MulticastFly_Implementation()
+void AMMOARPGCharacter::MulticastActionSwitch_Implementation()
 {
-	ResetActionState(ECharacterActionState::FLIGHT_STATE);
-	GetFlyComponent()->ResetFly();
+	if (UCharacterMovementComponent* CharacterMovementComponent
+		=Cast<UCharacterMovementComponent>(GetMovementComponent()))
+	{
+		if (CharacterMovementComponent->MovementMode==EMovementMode::MOVE_Flying
+			|| CharacterMovementComponent->MovementMode == EMovementMode::MOVE_Walking)
+		{
+			ResetActionState(ECharacterActionState::FLIGHT_STATE);
+			GetFlyComponent()->ResetFly();
+		}
+		else if (CharacterMovementComponent->MovementMode == EMovementMode::MOVE_Swimming)
+		{
+			GetSwimmingComponent()->GoUnderWater();
+		}
+	}
+
 }
 
 void AMMOARPGCharacter::Fast_Implementation()
@@ -147,6 +161,25 @@ void AMMOARPGCharacter::MulticastFast_Implementation()
 	if (ActionState == ECharacterActionState::FLIGHT_STATE)
 	{
 		GetFlyComponent()->ResetFastFly();
+	}
+	else if (ActionState == ECharacterActionState::SWIMMING_STATE)
+	{
+		GetSwimmingComponent()->ResetFastSwimming();
+	}
+}
+
+
+void AMMOARPGCharacter::FastReleased_Implementation()
+{
+	MulticastFastReleased();
+}
+
+
+void AMMOARPGCharacter::MulticastFastReleased_Implementation()
+{
+	if (ActionState == ECharacterActionState::SWIMMING_STATE)
+	{
+		GetSwimmingComponent()->ResetFastSwimming();
 	}
 }
 
@@ -167,16 +200,19 @@ void AMMOARPGCharacter::MoveForward(float Value)
 	//if ((Controller != nullptr) && (Value != 0.0f))
 	if ((Controller != nullptr))
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
 		if (ActionState==ECharacterActionState::FLIGHT_STATE)
 		{
 			GetFlyComponent()->FlyForwardAxis(Value);
 		}
+		else if (ActionState == ECharacterActionState::SWIMMING_STATE)
+		{
+			GetSwimmingComponent()->SwimForwardAxis(Value);
+		}
 		else
 		{
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 			// get forward vector
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 			AddMovementInput(Direction, Value);

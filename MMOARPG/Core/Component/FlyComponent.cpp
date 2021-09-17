@@ -12,7 +12,7 @@ UFlyComponent::UFlyComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	//bFastFly = false;
+	//bFast = false;
 	//DodgeTime = 0.f;
 	// ...
 }
@@ -38,7 +38,7 @@ void UFlyComponent::BeginPlay()
 		{
 			CapsuleComponent->OnComponentHit.AddDynamic(this, &UFlyComponent::Landed);
 		}
-		bFastFly.Fun.BindLambda([&]() { DodgeFly = EDodgeFly::DODGE_NONE; });
+		bFast.Fun.BindLambda([&]() { DodgeFly = EDodgeFly::DODGE_NONE; });
 		//登陆之后回到地面
 		bLand.Fun.BindLambda([&]()
 			{
@@ -55,7 +55,7 @@ void UFlyComponent::Landed(UPrimitiveComponent* HitComponent, AActor* OtherActor
 	if (MMOARPGCharacterBase.IsValid())
 	{
 		if (MMOARPGCharacterBase->GetActionState()==ECharacterActionState::FLIGHT_STATE
-			&&bFastFly)
+			&&bFast)
 		{
 			//点乘
 			float CosValue =
@@ -77,14 +77,6 @@ void UFlyComponent::Landed(UPrimitiveComponent* HitComponent, AActor* OtherActor
 	}
 }
 
-void UFlyComponent::Print(float InTime, const FString& InString)
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1, InTime, FColor::Red, FString::Printf(TEXT("%s"), *InString));
-	}
-}
 
 // Called every frame
 void UFlyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -105,65 +97,12 @@ void UFlyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			{
 				if (!bLand)
 				{
-					//角色旋转
-					{
-						//相机和胶囊体旋转
-						FRotator CameraRotator = CameraComponent->GetComponentRotation();
-						FRotator CapsuleRotator = CapsuleComponent->GetComponentRotation();
-						//修正Pitch
-						if (!bFastFly)
-						{
-							CameraRotator.Pitch = 0.f;
-						}
-						//根据速度转向
-						FRotator NewRot = FMath::RInterpTo(CapsuleRotator, CameraRotator,DeltaTime,8.f);
-						MMOARPGCharacterBase->SetActorRotation(NewRot);
-					}		
-					{
-						if (1)
-						{//帧
-							float PreFPS = 1.f / DeltaTime;
-							FRotator NewDeltaTimeRot = MMOARPGCharacterBase->GetActorRotation() - LastRotator;
-							NewDeltaTimeRot *= PreFPS;
-
-							FVector PhysicsAngularVelocityInDegrees;
-							Print(DeltaTime, PhysicsAngularVelocityInDegrees.ToString());
-							RotationRate.X = FMath::GetMappedRangeValueClamped(
-								FVector2D(-360.f, 360.f),
-								FVector2D(-1.f, 1.f),
-								NewDeltaTimeRot.Yaw);
-
-							RotationRate.Y= FMath::GetMappedRangeValueClamped(
-								FVector2D(-360.f, 360.f),
-								FVector2D(-1.f, 1.f),
-								NewDeltaTimeRot.Pitch);
-
-							LastRotator = MMOARPGCharacterBase->GetActorRotation();
-						}
-						else
-						{//角速度
-							//返回pitch yaw roll
-							FVector PhysicsAngularVelocityInDegrees = CapsuleComponent->GetPhysicsAngularVelocityInDegrees();
-							RotationRate.X = FMath::GetMappedRangeValueClamped(
-								 FVector2D(-360.f, 360.f),
-								 FVector2D(-1.f, 1.f), 
-								 PhysicsAngularVelocityInDegrees.Z);
-
-							RotationRate.Y = FMath::GetMappedRangeValueClamped(
-								FVector2D(-360.f, 360.f),
-								FVector2D(-1.f, 1.f),
-								PhysicsAngularVelocityInDegrees.Y);
-						}
-					}
+					//角色旋转			
+					LockView(DeltaTime,*bFast);
+					ResetRotationRate(DeltaTime);	
 				}
-
 			}
-
 		}
-		
-		//Dodge飞行计时,并重置
-		bFastFly.Tick(DeltaTime);
-
 		//着地计时
 		bLand.Tick(DeltaTime);
 	}
@@ -184,7 +123,7 @@ void UFlyComponent::ResetFly()
 			Reset();
 		}
 		
-		bFastFly = false;
+		bFast = false;
 	}
 }
 void UFlyComponent::Reset()
@@ -205,14 +144,14 @@ void UFlyComponent::ResetFastFly()
 {
 	if (CharacterMovementComponent.IsValid())
 	{
-		if (bFastFly)
+		if (bFast)
 		{
-			bFastFly = false;
+			bFast = false;
 			CharacterMovementComponent->MaxFlySpeed = 600.f;
 		}
 		else
 		{
-			bFastFly = true;
+			bFast = true;
 			CharacterMovementComponent->MaxFlySpeed = 2000.f;
 		}
 	}
@@ -221,9 +160,9 @@ void UFlyComponent::ResetFastFly()
 
 void UFlyComponent::ResetDodgeFly(EDodgeFly InDodgeFly)
 {
-	if (bFastFly)
+	if (bFast)
 	{
-		bFastFly = 1.6f;
+		bFast = 1.6f;
 		DodgeFly = InDodgeFly;
 		//DodgeTime = 1.6f;
 	}
@@ -238,7 +177,7 @@ void UFlyComponent::FlyForwardAxis(float InAxisValue)
 		CapsuleComponent.IsValid())
 	{
 
-		if (bFastFly)
+		if (bFast)
 		{
 			//按下 直接加速向前
 			const FVector Direction = CameraComponent->GetForwardVector();
@@ -249,7 +188,5 @@ void UFlyComponent::FlyForwardAxis(float InAxisValue)
 			const FVector Direction = CameraComponent->GetForwardVector();
 			MMOARPGCharacterBase->AddMovementInput(Direction, InAxisValue);
 		}
-
-
 	}
 }

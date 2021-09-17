@@ -31,9 +31,14 @@ void UMMOARPGFlyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (AMMOARPGCharacterBase* InCharacterBase = Cast<AMMOARPGCharacterBase>(TryGetPawnOwner()))
 	{
 		//¹ØÁªÊôÐÔ
-		bFastFly = *InCharacterBase->GetFlyComponent()->bFastFly;
+
 		DodgeFly = InCharacterBase->GetFlyComponent()->DodgeFly;
 		bLand = *InCharacterBase->GetFlyComponent()->bLand;
+		bFast = *InCharacterBase->GetFlyComponent()->bFast;
+		if (UCharacterMovementComponent* InCMC = Cast<UCharacterMovementComponent>(InCharacterBase->GetMovementComponent()))
+		{
+			ResetAxisSpeed(InCMC->MaxFlySpeed);
+		}
 	}
 
 }

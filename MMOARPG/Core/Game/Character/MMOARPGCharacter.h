@@ -67,15 +67,21 @@ protected:
 	void SwitchFight();
 
 	UFUNCTION(Server,Reliable)
-	void Fly();
+	void ActionSwitch();
 	//·þÎñÆ÷¹ã²¥
 	UFUNCTION(NetMulticast,Reliable)
-	void MulticastFly();
+	void MulticastActionSwitch();
 
 	UFUNCTION(Server, Reliable)
 	void Fast();
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastFast();
+
+	UFUNCTION(Server, Reliable)
+	void FastReleased();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFastReleased();
+
 	UFUNCTION(Server, Reliable)
 	void DodgeLeft();
 	UFUNCTION(NetMulticast, Reliable)

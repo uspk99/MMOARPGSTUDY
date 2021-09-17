@@ -6,6 +6,7 @@
 #include "../../../Character/Core/MMOARPGCharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "../../../../Component/FlyComponent.h"
+#include "../../../../Component/SwimmingComponent.h"
 
 UAnimInstanceComponentBase::UAnimInstanceComponentBase()
 	:Super()
@@ -28,6 +29,10 @@ void UAnimInstanceComponentBase::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
+}
+
+void UAnimInstanceComponentBase::ResetAxisSpeed(float NewSpeed)
+{
 	if (AMMOARPGCharacterBase* InCharacterBase = Cast<AMMOARPGCharacterBase>(TryGetPawnOwner()))
 	{
 		//不能直接GetVelocity，因为在绝对坐标里
@@ -38,13 +43,13 @@ void UAnimInstanceComponentBase::NativeUpdateAnimation(float DeltaSeconds)
 
 		if (UCharacterMovementComponent* InCMC = Cast<UCharacterMovementComponent>(InCharacterBase->GetMovementComponent()))
 		{
-			float MaxFSpeed = InCMC->MaxFlySpeed;
+			//float MaxFSpeed = InCMC->MaxFlySpeed;			
 			//原本的范围线性映射到 -1到+1；
-			AxisSpeed.X = FMath::GetMappedRangeValueClamped(FVector2D(-MaxFSpeed, MaxFSpeed),
+			AxisSpeed.X = FMath::GetMappedRangeValueClamped(FVector2D(-NewSpeed, NewSpeed),
 				FVector2D(-1.f, 1.f), SpeedVector.X);
-			AxisSpeed.Y = FMath::GetMappedRangeValueClamped(FVector2D(-MaxFSpeed, MaxFSpeed),
+			AxisSpeed.Y = FMath::GetMappedRangeValueClamped(FVector2D(-NewSpeed, NewSpeed),
 				FVector2D(-1.f, 1.f), SpeedVector.Y);
-			AxisSpeed.Z = FMath::GetMappedRangeValueClamped(FVector2D(-MaxFSpeed, MaxFSpeed),
+			AxisSpeed.Z = FMath::GetMappedRangeValueClamped(FVector2D(-NewSpeed, NewSpeed),
 				FVector2D(-1.f, 1.f), SpeedVector.Z);
 		}
 		//关联属性
