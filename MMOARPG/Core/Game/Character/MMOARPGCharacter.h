@@ -72,16 +72,28 @@ protected:
 	UFUNCTION(NetMulticast,Reliable)
 	void MulticastActionSwitch();
 
+//¼Ó¼õËÙ
 	UFUNCTION(Server, Reliable)
 	void Fast();
 	UFUNCTION(NetMulticast, Reliable)
 		void MulticastFast();
 
 	UFUNCTION(Server, Reliable)
+		void SlowDown();
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastSlowDown();
+
+	UFUNCTION(Server, Reliable)
+		void SlowDownReleased();
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastSlowDownReleased();
+
+	UFUNCTION(Server, Reliable)
 	void FastReleased();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFastReleased();
 
+	//×óÓÒ»ØÐý
 	UFUNCTION(Server, Reliable)
 	void DodgeLeft();
 	UFUNCTION(NetMulticast, Reliable)

@@ -68,6 +68,9 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAction("Fast", IE_Pressed, this, &AMMOARPGCharacter::Fast);
 	PlayerInputComponent->BindAction("Fast", IE_Released, this, &AMMOARPGCharacter::FastReleased);
 
+	PlayerInputComponent->BindAction("SlowDown", IE_Pressed, this, &AMMOARPGCharacter::SlowDown);
+	PlayerInputComponent->BindAction("SlowDown", IE_Released, this, &AMMOARPGCharacter::SlowDownReleased);
+
 	PlayerInputComponent->BindAction("DodgeLeft", IE_Pressed, this, &AMMOARPGCharacter::DodgeLeft);
 	PlayerInputComponent->BindAction("DodgeRight", IE_Pressed, this, &AMMOARPGCharacter::DodgeRight);
 
@@ -166,8 +169,36 @@ void AMMOARPGCharacter::MulticastFast_Implementation()
 	{
 		GetSwimmingComponent()->ResetFastSwimming();
 	}
+	else if (ActionState==ECharacterActionState::FIGHT_STATE
+		||ActionState==ECharacterActionState::NORMAL_STATE)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 800.f;
+	}
 }
 
+
+void AMMOARPGCharacter::SlowDown_Implementation()
+{
+	MulticastSlowDown();
+}
+
+
+void AMMOARPGCharacter::MulticastSlowDown_Implementation()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 230.f;
+}
+
+
+void AMMOARPGCharacter::SlowDownReleased_Implementation()
+{
+	MulticastSlowDownReleased();
+}
+
+
+void AMMOARPGCharacter::MulticastSlowDownReleased_Implementation()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+}
 
 void AMMOARPGCharacter::FastReleased_Implementation()
 {
@@ -180,6 +211,11 @@ void AMMOARPGCharacter::MulticastFastReleased_Implementation()
 	if (ActionState == ECharacterActionState::SWIMMING_STATE)
 	{
 		GetSwimmingComponent()->ResetFastSwimming();
+	}
+	else if (ActionState == ECharacterActionState::FIGHT_STATE
+		|| ActionState == ECharacterActionState::NORMAL_STATE)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	}
 }
 
