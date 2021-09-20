@@ -25,6 +25,32 @@ enum class EDodgeFly : uint8
 	DODGE_RIGHT		UMETA(DisplayName = "Right"),
 };
 
+UENUM(BlueprintType)
+enum class EClimbingState : uint8
+{
+	CLIMBING_NONE					UMETA(DisplayName = "None"),
+	CLIMBING_CLIMBOVEROBSTACLES		UMETA(DisplayName = "Climb Over Obstacles"),
+	CLIMBING_WALLCLIMBING			UMETA(DisplayName = "Wall Climbing"),
+	CLIMBING_CLIMBING				UMETA(DisplayName = "Climbing"),
+	CLIMBING_TOGROUND				UMETA(DisplayName = "To Ground"),
+	CLIMBING_TOTOP				UMETA(DisplayName = "To Top"),
+};
+
+enum class EClimbingMontageState : uint8
+{
+	CLIMBING_DASH_D_RM				UMETA(DisplayName = "Climbing Dash Down	"),
+	CLIMBING_DASH_DR_RM				UMETA(DisplayName = "Climbing Dash Down	Right"),
+	CLIMBING_DASH_DL_RM				UMETA(DisplayName = "Climbing Dash Down Left"),
+	CLIMBING_DASH_L_RM				UMETA(DisplayName = "Climbing Dash Left"),
+	CLIMBING_DASH_R_RM				UMETA(DisplayName = "Climbing Dash Right"),
+	CLIMBING_DASH_U_RM				UMETA(DisplayName = "Climbing Dash Up"),
+	CLIMBING_DASH_UL_RM				UMETA(DisplayName = "Climbing Dash Down	Left"),
+	CLIMBING_DASH_UR_RM				UMETA(DisplayName = "Climbing Dash Down	Right"),
+	CLIMBING_CLIMB_UP_AT_TOP		UMETA(DisplayName = "Climbing Climb Up At Top"),
+
+	CLIMBING_DASH_MAX				UMETA(DisplayName = "_MAX"),
+};
+
 struct FResultBool
 {
 	FResultBool()
@@ -32,7 +58,7 @@ struct FResultBool
 	{
 
 	}
-	void Tick(float DeltaTime)
+	void Tick(float DeltaTime,bool bReset)
 	{
 		//计时,并重置
 		if (Time > 0.f)
@@ -42,7 +68,10 @@ struct FResultBool
 			{
 				Fun.ExecuteIfBound();
 				Time = 0.f;
-				bSet = false;
+				if (bReset)
+				{
+					bSet = false;
+				}
 			}
 		}
 	}

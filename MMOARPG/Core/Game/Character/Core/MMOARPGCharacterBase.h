@@ -13,6 +13,7 @@
 
 class UFlyComponent;
 class USwimmingComponent;
+class UClimbingComponent;
 UCLASS()
 class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombatInterface
 {
@@ -20,17 +21,22 @@ class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombat
 		
 	friend class AMMOARPGGameMode;
 
-	UPROPERTY()
+	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UFlyComponent> FlyComponent;
 
-	UPROPERTY()
+	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<USwimmingComponent>SwimmingComponent;
+
+	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<UClimbingComponent>ClimbingComponent;
 
 public:
 	// Sets default values for this character's properties
 	AMMOARPGCharacterBase();
 
 	virtual void AnimSignal(int32 InSignal);
+
+	virtual void ClimbingMontageChanged(EClimbingMontageState InJumpState){}
 public:
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent,DisplayName="AnimSignal",Category="AnimEvent")
 	void K2_AnimSignal(int32 InSignal);
@@ -55,6 +61,7 @@ public:
 
 	FORCEINLINE UFlyComponent* GetFlyComponent() { return FlyComponent; }
 	FORCEINLINE USwimmingComponent* GetSwimmingComponent() { return SwimmingComponent; }
+	FORCEINLINE UClimbingComponent* GetClimbingComponent() { return ClimbingComponent; }
 
 	void SetUserID(int32 InUserID) { UserID = InUserID; };
 

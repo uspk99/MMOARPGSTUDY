@@ -6,6 +6,7 @@
 #include "../../Common/Interface/KneadingInterface.h"
 #include "MMOARPGType.h"
 #include "Core/MMOARPGCharacterBase.h"
+#include "../../../MMOARPGGameType.h"
 #include "MMOARPGCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -71,6 +72,9 @@ protected:
 	//服务器广播
 	UFUNCTION(NetMulticast,Reliable)
 	void MulticastActionSwitch();
+//跳跃
+	void CharacterJump();
+	void CharacterStopJumping();
 
 //加减速
 	UFUNCTION(Server, Reliable)
@@ -109,7 +113,9 @@ protected:
 
 	virtual void OnRep_ActionStateChanged();
 	void FightChanged();
+public:
 
+	virtual void ClimbingMontageChanged(EClimbingMontageState InJumpState);
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }

@@ -15,7 +15,7 @@ void USwimmingComponent::BeginPlay()
 void USwimmingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	bFast.Tick(DeltaTime, true);
 	if (CharacterMovementComponent.IsValid())
 	{
 		//×ËÌ¬ÇÐ»»

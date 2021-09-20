@@ -8,7 +8,7 @@
 #include "../../../../MMOARPGGameInstance.h"
 #include "MMOARPG/Core/Component/FlyComponent.h"
 #include "../../../../Core/Component/SwimmingComponent.h"
-
+#include "../../../../Core/Component/ClimbingComponent.h"
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	:ActionState(ECharacterActionState::NORMAL_STATE)
@@ -21,6 +21,7 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 
 	FlyComponent = CreateDefaultSubobject<UFlyComponent>(TEXT("FlyComponent"));
 	SwimmingComponent = CreateDefaultSubobject<USwimmingComponent>(TEXT("SwimmingComponent"));
+	ClimbingComponent = CreateDefaultSubobject<UClimbingComponent>(TEXT("ClimbingComponent"));
 	//FlyComponent->SetupAttachment(RootComponent);
 
 }

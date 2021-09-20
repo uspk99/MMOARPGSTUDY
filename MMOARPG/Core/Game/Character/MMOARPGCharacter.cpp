@@ -10,7 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "../../Component/FlyComponent.h"
 #include "../../Component/SwimmingComponent.h"
-
+#include "../../Component/ClimbingComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AMMOARPGCharacter
@@ -60,8 +60,8 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMMOARPGCharacter::CharacterJump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AMMOARPGCharacter::CharacterStopJumping);
 
 	PlayerInputComponent->BindAction("SwitchFight", IE_Pressed, this, &AMMOARPGCharacter::SwitchFight);
 	PlayerInputComponent->BindAction("ActionSwitch", IE_Pressed, this, &AMMOARPGCharacter::ActionSwitch);
@@ -155,6 +155,22 @@ void AMMOARPGCharacter::MulticastActionSwitch_Implementation()
 
 }
 
+
+void AMMOARPGCharacter::CharacterJump()
+{
+	Jump();
+	if (ActionState==ECharacterActionState::CLIMB_STATE)
+	{
+		GetClimbingComponent()->ResetJump();
+	}
+}
+
+
+void AMMOARPGCharacter::CharacterStopJumping()
+{
+	StopJumping();
+}
+
 void AMMOARPGCharacter::Fast_Implementation()
 {
 	MulticastFast();
@@ -233,6 +249,7 @@ void AMMOARPGCharacter::LookUpAtRate(float Rate)
 
 void AMMOARPGCharacter::MoveForward(float Value)
 {
+	
 	//if ((Controller != nullptr) && (Value != 0.0f))
 	if ((Controller != nullptr))
 	{
@@ -243,6 +260,10 @@ void AMMOARPGCharacter::MoveForward(float Value)
 		else if (ActionState == ECharacterActionState::SWIMMING_STATE)
 		{
 			GetSwimmingComponent()->SwimForwardAxis(Value);
+		}
+		else if (ActionState == ECharacterActionState::CLIMB_STATE)
+		{
+			GetClimbingComponent()->ClimbingForwardAxis(Value);
 		}
 		else
 		{
@@ -260,7 +281,11 @@ void AMMOARPGCharacter::MoveForward(float Value)
 
 void AMMOARPGCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if (ActionState==ECharacterActionState::CLIMB_STATE)
+	{
+		GetClimbingComponent()->ClimbingRightAxis(Value);
+	}
+	else if ( (Controller != nullptr) && (Value != 0.0f) )
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -281,6 +306,19 @@ void AMMOARPGCharacter::FightChanged()
 		{
 			PlayAnimMontage(InAnimTable->SwitchFightMontage, 1.f,
 				ActionState == ECharacterActionState::FIGHT_STATE ? TEXT("0") : TEXT("1"));
+		}
+	}
+}
+
+
+void AMMOARPGCharacter::ClimbingMontageChanged(EClimbingMontageState InJumpState)
+{
+	if (FCharacterAnimTable* InAnimTable = GetAnimTable())
+	{
+		if (InAnimTable->ClimbingMontage)
+		{
+			PlayAnimMontage(InAnimTable->ClimbingMontage, 1.f,
+				*FString::FromInt((int32)InJumpState));
 		}
 	}
 }

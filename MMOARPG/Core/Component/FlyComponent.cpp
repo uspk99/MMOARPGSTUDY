@@ -82,7 +82,7 @@ void UFlyComponent::Landed(UPrimitiveComponent* HitComponent, AActor* OtherActor
 void UFlyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	bFast.Tick(DeltaTime,false);
 	// ...
 	if (CharacterMovementComponent.IsValid()&&
 		MMOARPGCharacterBase.IsValid()&&
@@ -104,7 +104,7 @@ void UFlyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			}
 		}
 		//着地计时
-		bLand.Tick(DeltaTime);
+		bLand.Tick(DeltaTime,true);
 	}
 }
 

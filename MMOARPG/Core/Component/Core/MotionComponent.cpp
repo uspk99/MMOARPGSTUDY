@@ -42,7 +42,7 @@ void UMotionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 	// ...
 	//Dodge飞行计时,并重置
-	bFast.Tick(DeltaTime);
+	//bFast.Tick(DeltaTime);
 }
 
 
