@@ -16,6 +16,7 @@ UClimbingComponent::UClimbingComponent()
 	:Super()
 	,ClimbingState(EClimbingState::CLIMBING_NONE)
 	, bJumpToClimbing(false)
+	,ClimbingHeight(0.f)
 {
 }
 
@@ -36,6 +37,7 @@ void UClimbingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	}
 
 	bJump.Tick(DeltaTime,true);
+	bWallClimbing.Tick(DeltaTime, true);
 }
 
 void UClimbingComponent::ResetJump()
@@ -137,7 +139,7 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 	{
 		//胸口 
 		FVector StartTraceChestLocation = LocaLocation;
-		StartTraceChestLocation.Z += CapsuleComponent->GetScaledCapsuleHalfHeight() / 4.f;
+		StartTraceChestLocation.Z += CapsuleComponent->GetScaledCapsuleHalfHeight() / 8.f;
 
 		FVector EndTraceChestLocation = StartTraceChestLocation + ForwardDireaction * 100.f;
 		
@@ -215,8 +217,20 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 
 	if (HitChestResult.bBlockingHit&&HitHeadResult.bBlockingHit)
 	{//爬墙
-		if (ChestDistance<=75.f && HeadDistance<=75.f)
+		//if (ChestDistance<=75.f && HeadDistance<=75.f)
+		if (ChestDistance <= 45.f)
 		{
+			//贴近
+			float CompensationValue = ChestDistance - 28.f;
+			if (CompensationValue>0.f)
+			{
+				FVector TargetPoint = ForwardDireaction * CompensationValue;
+				FVector TargetLocation = 
+					MMOARPGCharacterBase->GetActorLocation()+TargetPoint* (3.f) *DeltaTime;
+
+				MMOARPGCharacterBase->SetActorLocation(TargetLocation);
+			}
+			//爬墙
 			if (ClimbingState == EClimbingState::CLIMBING_CLIMBING)
 			{
 				if (HitGroundResult.bBlockingHit)
@@ -263,14 +277,56 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 		{
 			ClimbingState = EClimbingState::CLIMBING_TOTOP;
 			//协程
-			GThread::Get()->GetCoroutines().BindLambda(1.f, [this]()
+			GThread::Get()->GetCoroutines().BindLambda(0.9f, [this]()
 				{
 					ReleaseClimbing();
 				});
 		}
-		else if (ClimbingState != EClimbingState::CLIMBING_TOTOP)
+		else if (ClimbingState != EClimbingState::CLIMBING_TOTOP
+			&&ClimbingState!=EClimbingState::CLIMBING_WALLCLIMBING
+			&&!bWallClimbing)
 		{
-			ClimbingState = EClimbingState::CLIMBING_WALLCLIMBING;
+			if (ChestDistance<= 26.f)
+			{
+				{//面向墙
+					FRotator NewRot = FRotationMatrix::MakeFromX(
+						MMOARPGCharacterBase->GetActorForwardVector() - HitChestResult.Normal).Rotator();
+					ActorRotation.Yaw = NewRot.Yaw;
+					ActorRotation.Pitch = 0.f;
+					ActorRotation.Roll = 0.f;
+					MMOARPGCharacterBase->SetActorRotation(ActorRotation);
+				}
+				//向下的射线
+				FHitResult HitWallClimbing;
+				FVector StartTraceLocation = LocaLocation + ForwardDireaction * 40.f;
+				StartTraceLocation.Z += CapsuleComponent->GetScaledCapsuleHalfHeight();
+				FVector EndTraceLocation = StartTraceLocation - UpDireaction * 100.f;
+				TArray<AActor*> ClimbingActorToIgnore;
+
+				UKismetSystemLibrary::LineTraceSingle(
+					GetWorld(),
+					StartTraceLocation,
+					EndTraceLocation,
+					ETraceTypeQuery::TraceTypeQuery1,//查询通道
+					false,//false:简单碰撞
+					ClimbingActorToIgnore,
+					EDrawDebugTrace::Type::ForOneFrame,//ForOneFrame一帧绘制 None不绘制
+					HitWallClimbing,
+					true);
+				if (HitWallClimbing.bBlockingHit)
+				{
+					HitWallClimbing.Location.Z += HitWallClimbing.Distance;
+					ClimbingTracePoint = HitWallClimbing.Location;
+					//获取墙高
+					ClimbingHeight = HitWallClimbing.Distance;
+
+					ClimbingState = EClimbingState::CLIMBING_WALLCLIMBING;
+					bWallClimbing = true;
+					bWallClimbing = 1.6f;
+				}
+
+
+			}
 		}
 	}
 	else 
@@ -284,12 +340,25 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 
 	if (HitChestResult.bBlockingHit)
 	{
-		FRotator NewRot = FRotationMatrix::MakeFromX(
-			MMOARPGCharacterBase->GetActorForwardVector() - HitChestResult.Normal).Rotator();
+		//只在爬行状态才会改变
+		if (ClimbingState==EClimbingState::CLIMBING_CLIMBING)
+		{
+			FRotator NewRot = FRotationMatrix::MakeFromX(
+				MMOARPGCharacterBase->GetActorForwardVector() - HitChestResult.Normal).Rotator();
 
-		ActorRotation.Yaw = NewRot.Yaw;
-		ActorRotation.Pitch = NewRot.Pitch;
-		MMOARPGCharacterBase->SetActorRotation(ActorRotation);
+			ActorRotation.Yaw = NewRot.Yaw;
+			ActorRotation.Pitch = NewRot.Pitch;
+			ActorRotation.Roll = 0.f;
+
+			MMOARPGCharacterBase->SetActorRotation(ActorRotation);
+		}
+
+	}
+
+	if (bWallClimbing)
+	{//移动到射线点
+		FVector VInterpTolocation = FMath::VInterpTo(LocaLocation, ClimbingTracePoint,DeltaTime,7.f);
+		MMOARPGCharacterBase->SetActorLocation(VInterpTolocation);
 	}
 
 }
@@ -315,4 +384,14 @@ void UClimbingComponent::ReleaseClimbing()
 void UClimbingComponent::Climbing()
 {
 	SetClimbingState(EMovementMode::MOVE_Custom, ECharacterActionState::CLIMB_STATE, false);
+}
+
+void UClimbingComponent::ClearClimbingState()
+{
+	ClimbingState = EClimbingState::CLIMBING_NONE;
+}
+
+bool UClimbingComponent::IsLowClimbing()
+{
+	return ClimbingHeight <= 40.f;
 }

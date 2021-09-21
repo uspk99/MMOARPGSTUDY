@@ -25,6 +25,8 @@ public:
 		bool bJumpToClimbing;
 
 	FResultBool bJump;
+
+	FResultBool bWallClimbing;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -44,12 +46,16 @@ public:
 
 	void ReleaseClimbing();
 	void Climbing();
+	void ClearClimbingState();
+
+	bool IsLowClimbing();
 private:
 	void TraceClimbingState(float DeltaTime);
 
 	void SetClimbingState(EMovementMode InMode, ECharacterActionState InCharacterActionState,bool bOrientRotation);
-
-
-
+private:
+	FVector ClimbingTracePoint;
+	
+	float ClimbingHeight;
 
 };

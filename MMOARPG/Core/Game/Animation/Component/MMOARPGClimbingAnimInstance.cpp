@@ -39,8 +39,26 @@ void UMMOARPGClimbingAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		}
 		if (ClimbingState==EClimbingState::CLIMBING_TOTOP)
 		{
-			InCharacterBase->GetClimbingComponent()->ClimbingState = EClimbingState::CLIMBING_NONE;
+			InCharacterBase->GetClimbingComponent()->ClearClimbingState();
 			InCharacterBase->ClimbingMontageChanged(EClimbingMontageState::CLIMBING_CLIMB_UP_AT_TOP);
+		}
+		else if (ClimbingState == EClimbingState::CLIMBING_WALLCLIMBING)
+		{
+			InCharacterBase->GetClimbingComponent()->ClearClimbingState();
+			if (InCharacterBase->GetClimbingComponent()->IsLowClimbing())
+			{
+				InCharacterBase->ClimbingMontageChanged(
+					(EClimbingMontageState)FMath::RandRange(
+						(int32)EClimbingMontageState::CLIMBING_ALS_N_MANTLE_1M_LH,
+						(int32)EClimbingMontageState::CLIMBING_ALS_N_MANTLE_1M_RH));
+			}
+			else
+			{
+				InCharacterBase->ClimbingMontageChanged(
+					EClimbingMontageState::CLIMBING_ALS_N_MANTLE_2M);
+			}
+
+
 		}
 	}
 }

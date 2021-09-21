@@ -48,6 +48,11 @@ enum class EClimbingMontageState : uint8
 	CLIMBING_DASH_UR_RM				UMETA(DisplayName = "Climbing Dash Down	Right"),
 	CLIMBING_CLIMB_UP_AT_TOP		UMETA(DisplayName = "Climbing Climb Up At Top"),
 
+	CLIMBING_ALS_N_MANTLE_1M_LH		UMETA(DisplayName = "Climbing Left Turn"),
+	CLIMBING_ALS_N_MANTLE_1M_RH		UMETA(DisplayName = "Climbing Right Turn"),
+
+	CLIMBING_ALS_N_MANTLE_2M		UMETA(DisplayName = "Climbing Turn"),
+
 	CLIMBING_DASH_MAX				UMETA(DisplayName = "_MAX"),
 };
 
