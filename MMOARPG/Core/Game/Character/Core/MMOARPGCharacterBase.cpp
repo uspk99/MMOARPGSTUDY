@@ -106,3 +106,14 @@ void AMMOARPGCharacterBase::AnimSignal(int32 InSignal)
 {
 	K2_AnimSignal(InSignal);
 }
+
+void AMMOARPGCharacterBase::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	//if (LastActionState==ECharacterActionState::CLIMB_STATE)
+	{
+		StopAnimMontage();
+	}
+
+}

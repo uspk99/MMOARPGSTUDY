@@ -151,6 +151,20 @@ void AMMOARPGCharacter::MulticastActionSwitch_Implementation()
 		{
 			GetSwimmingComponent()->GoUnderWater();
 		}
+		else if (CharacterMovementComponent->MovementMode==EMovementMode::MOVE_Custom)
+		{
+			FVector Dir = -GetActorForwardVector();
+			GetClimbingComponent()->LaunchCharacter(Dir * 1000.f);
+			if (!GetClimbingComponent()->IsDropClimbingState())
+			{
+				GetClimbingComponent()->ReleaseClimbing();
+				GetClimbingComponent()->DropClimbingState();
+
+				ClimbingMontageChanged(EClimbingMontageState::CLIMBING_DASH_DROP_RM);
+
+			}
+
+		}
 	}
 
 }

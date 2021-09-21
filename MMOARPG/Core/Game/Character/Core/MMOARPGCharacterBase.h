@@ -37,6 +37,8 @@ public:
 	virtual void AnimSignal(int32 InSignal);
 
 	virtual void ClimbingMontageChanged(EClimbingMontageState InJumpState){}
+
+	virtual void Landed(const FHitResult& Hit);
 public:
 	UFUNCTION(BlueprintCallable,BlueprintImplementableEvent,DisplayName="AnimSignal",Category="AnimEvent")
 	void K2_AnimSignal(int32 InSignal);

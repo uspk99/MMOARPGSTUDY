@@ -27,11 +27,17 @@ public:
 	FResultBool bJump;
 
 	FResultBool bWallClimbing;
+
+private:
+	FVector PendingLaunchVelocity;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:
+	void LaunchCharacter(const FVector InVelocity);
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -47,8 +53,14 @@ public:
 	void ReleaseClimbing();
 	void Climbing();
 	void ClearClimbingState();
+	void ResetClimbingState();
 
 	bool IsLowClimbing();
+
+	void DropClimbingState();
+	bool IsDropClimbingState();
+
+	EClimbTurnState GetTurnState(){ return TurnState; }
 private:
 	void TraceClimbingState(float DeltaTime);
 
@@ -58,4 +70,13 @@ private:
 	
 	float ClimbingHeight;
 
+	void AdjustmentClimbing(bool bStart = true);
+
+	void AdjustmentPendingLaunchVelocity(float DeltaTime);
+
+	float Scanning(FHitResult& HitResult, TFunction<void(FVector&, FVector&)> TraceLocation);
+
+	EClimbTurnState TurnState;
+
+	FResultBool bTurn;
 };

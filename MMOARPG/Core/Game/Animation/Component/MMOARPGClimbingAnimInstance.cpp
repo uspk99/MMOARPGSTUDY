@@ -57,8 +57,30 @@ void UMMOARPGClimbingAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 				InCharacterBase->ClimbingMontageChanged(
 					EClimbingMontageState::CLIMBING_ALS_N_MANTLE_2M);
 			}
-
-
+		}
+		else if (ClimbingState == EClimbingState::CLIMBING_TRUN)
+		{
+			EClimbTurnState TurnState = InCharacterBase->GetClimbingComponent()->GetTurnState();
+			switch (TurnState)
+			{
+			case EClimbTurnState::TURN_NONE:
+				break;
+			case EClimbTurnState::OUTSIDE_RIGHT:
+				InCharacterBase->ClimbingMontageChanged(EClimbingMontageState::CLIMBING_TURN_CORNER_OUTSIDE_R_RM);
+				break;
+			case EClimbTurnState::OUTSIDE_LEFT:
+				InCharacterBase->ClimbingMontageChanged(EClimbingMontageState::CLIMBING_TURN_CORNER_OUTSIDE_L_RM);
+				break;
+			case EClimbTurnState::INSIDE_RIGHT:
+				InCharacterBase->ClimbingMontageChanged(EClimbingMontageState::CLIMBING_TURN_CORNER_INSIDE_R_RM);
+				break;
+			case EClimbTurnState::INSIDE_LEFT:
+				InCharacterBase->ClimbingMontageChanged(EClimbingMontageState::CLIMBING_TURN_CORNER_INSIDE_L_RM);
+				break;
+			default:
+				break;
+			}
+			InCharacterBase->GetClimbingComponent()->ResetClimbingState();
 		}
 	}
 }

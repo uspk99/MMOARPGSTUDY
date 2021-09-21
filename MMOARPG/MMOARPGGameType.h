@@ -33,7 +33,9 @@ enum class EClimbingState : uint8
 	CLIMBING_WALLCLIMBING			UMETA(DisplayName = "Wall Climbing"),
 	CLIMBING_CLIMBING				UMETA(DisplayName = "Climbing"),
 	CLIMBING_TOGROUND				UMETA(DisplayName = "To Ground"),
-	CLIMBING_TOTOP				UMETA(DisplayName = "To Top"),
+	CLIMBING_TOTOP					UMETA(DisplayName = "To Top"),
+	CLIMBING_DROP					UMETA(DisplayName = "Drop"),
+	CLIMBING_TRUN					UMETA(DisplayName = "Trun"),
 };
 
 enum class EClimbingMontageState : uint8
@@ -53,7 +55,24 @@ enum class EClimbingMontageState : uint8
 
 	CLIMBING_ALS_N_MANTLE_2M		UMETA(DisplayName = "Climbing Turn"),
 
+	CLIMBING_DASH_DROP_RM				UMETA(DisplayName = "Climbing Drop"),
+
+	CLIMBING_TURN_CORNER_OUTSIDE_R_RM			UMETA(DisplayName = "Trun Corner Outside Right"),
+	CLIMBING_TURN_CORNER_OUTSIDE_L_RM			UMETA(DisplayName = "Turn Corner Outside Left"),
+	CLIMBING_TURN_CORNER_INSIDE_R_RM			UMETA(DisplayName = "Turn Corner Inside Right"),
+	CLIMBING_TURN_CORNER_INSIDE_L_RM			UMETA(DisplayName = "Turn Corner Inside Left"),
+
 	CLIMBING_DASH_MAX				UMETA(DisplayName = "_MAX"),
+};
+
+UENUM(BlueprintType)
+enum class EClimbTurnState : uint8
+{
+	TURN_NONE,
+	OUTSIDE_RIGHT,
+	OUTSIDE_LEFT,
+	INSIDE_RIGHT,
+	INSIDE_LEFT,
 };
 
 struct FResultBool

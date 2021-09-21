@@ -23,6 +23,43 @@ UClimbingComponent::UClimbingComponent()
 void UClimbingComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	bWallClimbing.Fun.BindLambda([this]()
+		{
+			AdjustmentClimbing(false);
+		});
+
+	bTurn.Fun.BindLambda([this]()
+		{
+			CharacterMovementComponent->GravityScale = 1.f;
+
+			FVector ForwardDireaction = MMOARPGCharacterBase->GetActorForwardVector();
+			FVector LocaLocation = MMOARPGCharacterBase->GetActorLocation();
+
+			FHitResult HitChestResult;
+			float ChestDistance = Scanning(HitChestResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
+				{
+					StartTraceLocation = LocaLocation;
+					StartTraceLocation.Z -= CapsuleComponent->GetScaledCapsuleHalfHeight() / 2.f;
+					EndTraceLocation = StartTraceLocation +
+						ForwardDireaction * CapsuleComponent->GetScaledCapsuleHalfHeight() * 2.f;
+				});
+			//修正 Turn
+			if (ChestDistance>=29.f)
+			{
+				LocaLocation += ForwardDireaction * (ChestDistance - 29.f);
+			}
+			else
+			{
+				LocaLocation -= ForwardDireaction * ( 29.f-ChestDistance );
+			}
+			MMOARPGCharacterBase->SetActorLocation(LocaLocation);
+		});
+}
+
+void UClimbingComponent::LaunchCharacter(const FVector InVelocity)
+{
+	PendingLaunchVelocity = InVelocity;
 }
 
 void UClimbingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -38,6 +75,9 @@ void UClimbingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 	bJump.Tick(DeltaTime,true);
 	bWallClimbing.Tick(DeltaTime, true);
+	bTurn.Tick(DeltaTime, true);
+
+	AdjustmentPendingLaunchVelocity(DeltaTime);
 }
 
 void UClimbingComponent::ResetJump()
@@ -100,13 +140,14 @@ void UClimbingComponent::PhysClimbing(float deltaTime, int32 Iterations)
 		if (!CharacterMovementComponent->HasAnimRootMotion())
 		{
 			//更新Velocity last方向乘以速度
-			CharacterMovementComponent->Velocity = CharacterMovementComponent->GetLastInputVector()
+			//添加自定义力
+			CharacterMovementComponent->Velocity = PendingLaunchVelocity + CharacterMovementComponent->GetLastInputVector()
 				* CharacterMovementComponent->MaxCustomMovementSpeed;
 		}
 		else
 		{
 			//动画的rootMotion
-			CharacterMovementComponent->Velocity =
+			CharacterMovementComponent->Velocity = PendingLaunchVelocity +
 				CharacterMovementComponent->ConstrainAnimRootMotionVelocity(
 					CharacterMovementComponent->AnimRootMotionVelocity,
 					CharacterMovementComponent->Velocity);
@@ -127,93 +168,138 @@ void UClimbingComponent::PhysClimbing(float deltaTime, int32 Iterations)
 
 void UClimbingComponent::TraceClimbingState(float DeltaTime)
 {
+	//转向时停止检测
+	if (bTurn)
+	{
+		return;
+	}
+
 	FVector ForwardDireaction = MMOARPGCharacterBase->GetActorForwardVector();
 	FVector UpDireaction = MMOARPGCharacterBase->GetActorUpVector();
 	FVector LocaLocation = MMOARPGCharacterBase->GetActorLocation();
+	FVector RightDireaction = MMOARPGCharacterBase->GetActorRightVector();
 
 	FRotator ActorRotation = MMOARPGCharacterBase->GetActorRotation();
 	
+
 	FHitResult HitChestResult;
-	TArray<AActor*> Ignores1;
-	float ChestDistance = MaxDistance;
-	{
-		//胸口 
-		FVector StartTraceChestLocation = LocaLocation;
-		StartTraceChestLocation.Z += CapsuleComponent->GetScaledCapsuleHalfHeight() / 8.f;
-
-		FVector EndTraceChestLocation = StartTraceChestLocation + ForwardDireaction * 100.f;
-		
-		if (UKismetSystemLibrary::LineTraceSingle(
-			GetWorld(),
-			StartTraceChestLocation,
-			EndTraceChestLocation,
-			ETraceTypeQuery::TraceTypeQuery1,//查询通道
-			false,//false:简单碰撞
-			Ignores1,
-			EDrawDebugTrace::Type::ForOneFrame,//ForOneFrame一帧绘制 None不绘制
-			HitChestResult,
-			true))//忽略自身
+	float ChestDistance = Scanning(HitChestResult, [&](FVector& StartTraceLocation,FVector& EndTraceLocation)
 		{
-			if (HitChestResult.bBlockingHit)
-			{
-				ChestDistance = FVector::Distance(StartTraceChestLocation, HitChestResult.Location);
+			StartTraceLocation = LocaLocation;
+			StartTraceLocation.Z -= CapsuleComponent->GetScaledCapsuleHalfHeight() / 2.f;
+			EndTraceLocation = StartTraceLocation + 
+				ForwardDireaction*CapsuleComponent->GetScaledCapsuleHalfHeight() * 2.f;
+		});
 
-			}
-		}
-
-	}
 	FHitResult HitHeadResult;
-	TArray<AActor*> Ignores2;
-	float HeadDistance = MaxDistance;
-	{
-		//头顶
-		FVector StartTraceHeadLocation = LocaLocation;
-		StartTraceHeadLocation.Z += CapsuleComponent->GetScaledCapsuleHalfHeight()+1.f;
-
-		FVector EndTraceHeadLocation = StartTraceHeadLocation + ForwardDireaction * 100.f;		
-		if (UKismetSystemLibrary::LineTraceSingle(
-			GetWorld(),
-			StartTraceHeadLocation,
-			EndTraceHeadLocation,
-			ETraceTypeQuery::TraceTypeQuery1,//查询通道
-			false,//false:简单碰撞
-			Ignores2,
-			EDrawDebugTrace::Type::ForOneFrame,//ForOneFrame一帧绘制 None不绘制
-			HitHeadResult,
-			true))//忽略自身
+	float HeadDistance = Scanning(HitHeadResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
 		{
-			if (HitHeadResult.bBlockingHit)
-			{
-				HeadDistance = FVector::Distance(StartTraceHeadLocation, HitHeadResult.Location);
-			}
-		}
-	}
+			StartTraceLocation = LocaLocation;
+			StartTraceLocation.Z += CapsuleComponent->GetScaledCapsuleHalfHeight();
+			EndTraceLocation = StartTraceLocation + 
+				ForwardDireaction * CapsuleComponent->GetScaledCapsuleHalfHeight() * 2.f;
+		});
 
 	FHitResult HitGroundResult;
-	TArray<AActor*> Ignores3;
-	float GroundDistance = MaxDistance;
-	{
-		FVector StartTraceLocation = LocaLocation;
-		StartTraceLocation.Z -= CapsuleComponent->GetScaledCapsuleHalfHeight();
-
-		FVector EndTraceLocation = StartTraceLocation + (-UpDireaction) * 100.f;
-		if (UKismetSystemLibrary::LineTraceSingle(
-			GetWorld(),
-			StartTraceLocation,
-			EndTraceLocation,
-			ETraceTypeQuery::TraceTypeQuery1,//查询通道
-			false,//false:简单碰撞
-			Ignores3,
-			EDrawDebugTrace::Type::ForOneFrame,//ForOneFrame一帧绘制 None不绘制
-			HitGroundResult,
-			true))//忽略自身
+	float GroundDistance = Scanning(HitGroundResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
 		{
-			if (HitHeadResult.bBlockingHit)
+			StartTraceLocation = LocaLocation;
+			StartTraceLocation.Z -= CapsuleComponent->GetScaledCapsuleHalfHeight();
+			EndTraceLocation = StartTraceLocation +
+				(-UpDireaction) * 40.f;
+		});
+	FHitResult HitRightResult;
+	float RightDistance = Scanning(HitRightResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
+		{
+			StartTraceLocation = LocaLocation + RightDireaction * 70.f;
+			EndTraceLocation = StartTraceLocation + ForwardDireaction * CapsuleComponent->GetScaledCapsuleHalfHeight();
+		});
+
+	FHitResult HitLeftResult;
+	float LeftDistance = Scanning(HitLeftResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
+		{
+			StartTraceLocation = LocaLocation - RightDireaction * 70.f;
+			EndTraceLocation = StartTraceLocation + ForwardDireaction * CapsuleComponent->GetScaledCapsuleHalfHeight();
+		});
+	FHitResult HitLeftSideResult;
+	float LeftSideDistance = Scanning(HitLeftSideResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
+		{
+			StartTraceLocation = LocaLocation - RightDireaction * 10.f-ForwardDireaction*10.f;
+			EndTraceLocation = StartTraceLocation - RightDireaction * CapsuleComponent->GetScaledCapsuleHalfHeight();
+		});
+
+	FHitResult HitRightSideResult;
+	float RightSideDistance = Scanning(HitRightSideResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
+		{
+			StartTraceLocation = LocaLocation + RightDireaction * 10.f - ForwardDireaction * 10.f;
+			EndTraceLocation = StartTraceLocation + RightDireaction * CapsuleComponent->GetScaledCapsuleHalfHeight();
+		});
+
+	auto CheckTurn = [&]()
+	{
+		if (!HitRightResult.bBlockingHit && !HitLeftSideResult.bBlockingHit && !HitRightSideResult.bBlockingHit)
+		{
+			FHitResult HitRightClimbingSideResult;
+			float RightClimbingSideDistance = Scanning(HitRightClimbingSideResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
+				{
+					StartTraceLocation = LocaLocation + RightDireaction * 70.f + ForwardDireaction * 40.f;
+					EndTraceLocation = StartTraceLocation - RightDireaction * 100.f;
+				});
+			if (HitRightClimbingSideResult.bBlockingHit&&RightClimbingSideDistance!=0.f)
 			{
-				GroundDistance = FVector::Distance(StartTraceLocation, HitHeadResult.Location);
+				if (RightClimbingSideDistance>=8.f)
+				{
+					bTurn = true;
+					bTurn = 1.2f;
+					TurnState = EClimbTurnState::OUTSIDE_RIGHT;
+				}
 			}
 		}
-	}
+		else if (!HitLeftResult.bBlockingHit && !HitLeftSideResult.bBlockingHit && !HitRightSideResult.bBlockingHit)
+		{
+			FHitResult HitLeftClimbingSideResult;
+			float LeftClimbingSideDistance = Scanning(HitLeftClimbingSideResult, [&](FVector& StartTraceLocation, FVector& EndTraceLocation)
+				{
+					StartTraceLocation = LocaLocation - RightDireaction * 70.f + ForwardDireaction * 40.f;
+					EndTraceLocation = StartTraceLocation + RightDireaction * 100.f;
+				});
+			if (HitLeftClimbingSideResult.bBlockingHit && LeftClimbingSideDistance != 0.f)
+			{
+				if (LeftClimbingSideDistance >= 8.f)
+				{
+					bTurn = true;
+					bTurn = 1.2f;
+					TurnState = EClimbTurnState::OUTSIDE_LEFT;
+				}
+			}
+		}
+		else if (HitLeftSideResult.bBlockingHit)
+		{//转弯临界值
+			if (FMath::IsNearlyEqual(LeftSideDistance, 43.f, 0.7f))
+			{
+				bTurn = true;
+				bTurn = 1.2f;
+				TurnState = EClimbTurnState::INSIDE_LEFT;
+
+			}
+		}
+		else if (HitRightSideResult.bBlockingHit)
+		{//转弯临界值不同，防止反复横跳
+			if (FMath::IsNearlyEqual(RightSideDistance,44.f,0.7f))
+			{
+				bTurn = true;
+				bTurn = 1.2f;
+				TurnState = EClimbTurnState::INSIDE_RIGHT;
+
+			}
+		}
+		if (bTurn)
+		{
+			ClimbingState = EClimbingState::CLIMBING_TRUN;
+			CharacterMovementComponent->GravityScale = 0.f;
+		}
+
+	};
 
 	if (HitChestResult.bBlockingHit&&HitHeadResult.bBlockingHit)
 	{//爬墙
@@ -222,7 +308,7 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 		{
 			//贴近
 			float CompensationValue = ChestDistance - 28.f;
-			if (CompensationValue>0.f)
+			if (CompensationValue>0.f && ClimbingState!=EClimbingState::CLIMBING_DROP)
 			{
 				FVector TargetPoint = ForwardDireaction * CompensationValue;
 				FVector TargetLocation = 
@@ -240,9 +326,44 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 						ClimbingState = EClimbingState::CLIMBING_TOGROUND;
 						ReleaseClimbing();
 					}
+					//检测是否旋转攀爬 近地
+					else if (
+						HitRightResult.bBlockingHit ||
+						HitLeftResult.bBlockingHit ||
+						HitLeftSideResult.bBlockingHit ||
+						HitRightSideResult.bBlockingHit)
+					{
+						if (!bTurn)
+						{
+							CheckTurn();
+						}
+					}
+				}
+				//检测是否旋转攀爬 高处
+				else if (
+					HitRightResult.bBlockingHit ||
+					HitLeftResult.bBlockingHit ||
+					HitLeftSideResult.bBlockingHit ||
+					HitRightSideResult.bBlockingHit)
+				{
+					if (!bTurn)
+					{
+						CheckTurn();
+					}
+				}
+				//角度调整
+				FVector ZAxis = FVector(0.f,0.f,1.f);
+				float CosValue = FVector::DotProduct(ZAxis, HitChestResult.ImpactNormal);
+				float CosAngle = (180.f / PI) * FMath::Acos(CosValue);
+				if (CosAngle < 35.f)
+				{
+					ClimbingState = EClimbingState::CLIMBING_NONE;
+					ReleaseClimbing();
 				}
 			}
-			else if (ClimbingState != EClimbingState::CLIMBING_TOGROUND)
+			//进入爬墙
+			else if (ClimbingState != EClimbingState::CLIMBING_TOGROUND
+				&&ClimbingState!=EClimbingState::CLIMBING_DROP)
 			{
 				ClimbingState = EClimbingState::CLIMBING_CLIMBING;
 				Climbing();
@@ -271,9 +392,10 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 			}
 		}
 	}
-	else if (HitChestResult.bBlockingHit)
+	else if (HitChestResult.bBlockingHit && !HitHeadResult.bBlockingHit)
 	{//翻墙 登顶
-		if (ClimbingState ==EClimbingState::CLIMBING_CLIMBING)
+		if (ClimbingState ==EClimbingState::CLIMBING_CLIMBING
+			&& !HitGroundResult.bBlockingHit)
 		{
 			ClimbingState = EClimbingState::CLIMBING_TOTOP;
 			//协程
@@ -300,7 +422,8 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 				FHitResult HitWallClimbing;
 				FVector StartTraceLocation = LocaLocation + ForwardDireaction * 40.f;
 				StartTraceLocation.Z += CapsuleComponent->GetScaledCapsuleHalfHeight();
-				FVector EndTraceLocation = StartTraceLocation - UpDireaction * 100.f;
+				FVector EndTraceLocation = StartTraceLocation - 
+					UpDireaction * CapsuleComponent->GetScaledCapsuleHalfHeight()*2.f;
 				TArray<AActor*> ClimbingActorToIgnore;
 
 				UKismetSystemLibrary::LineTraceSingle(
@@ -315,16 +438,25 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 					true);
 				if (HitWallClimbing.bBlockingHit)
 				{
-					HitWallClimbing.Location.Z += HitWallClimbing.Distance;
+					HitWallClimbing.Location.Z += CapsuleComponent->GetScaledCapsuleHalfHeight();
 					ClimbingTracePoint = HitWallClimbing.Location;
 					//获取墙高
 					ClimbingHeight = HitWallClimbing.Distance;
 
 					ClimbingState = EClimbingState::CLIMBING_WALLCLIMBING;
-					bWallClimbing = true;
-					bWallClimbing = 1.6f;
-				}
 
+					AdjustmentClimbing();
+					bWallClimbing = true;
+					if (IsLowClimbing())
+					{
+						bWallClimbing = 0.8f;
+					}
+					else
+					{
+						bWallClimbing = 1.6f;
+					}
+					
+				}
 
 			}
 		}
@@ -357,10 +489,17 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 
 	if (bWallClimbing)
 	{//移动到射线点
-		FVector VInterpTolocation = FMath::VInterpTo(LocaLocation, ClimbingTracePoint,DeltaTime,7.f);
+		FVector VInterpTolocation = FMath::VInterpTo(LocaLocation, ClimbingTracePoint,DeltaTime,9.f);
 		MMOARPGCharacterBase->SetActorLocation(VInterpTolocation);
 	}
 
+	if (ClimbingState == EClimbingState::CLIMBING_DROP)
+	{
+		if (CharacterMovementComponent->MovementMode != EMovementMode::MOVE_Falling)
+		{
+			ClearClimbingState();
+		}
+	}
 }
 
 void UClimbingComponent::SetClimbingState(EMovementMode InMode, ECharacterActionState InCharacterActionState, bool bOrientRotation)
@@ -374,6 +513,70 @@ void UClimbingComponent::SetClimbingState(EMovementMode InMode, ECharacterAction
 	ActorRotation.Pitch = 0.f;
 	MMOARPGCharacterBase->SetActorRotation(ActorRotation);
 	bJumpToClimbing = false;
+}
+
+void UClimbingComponent::AdjustmentClimbing(bool bStart /*= true*/)
+{
+	FVector RelativeLocation = MMOARPGCharacterBase->GetMesh()->GetRelativeLocation();
+	float AdjustValue = 10.f;
+	if (bStart)
+	{
+		RelativeLocation.Z += AdjustValue;
+	}
+	else
+	{
+		RelativeLocation.Z -= AdjustValue;
+	}
+	MMOARPGCharacterBase->GetMesh()->SetRelativeLocation(RelativeLocation);
+}
+
+void UClimbingComponent::AdjustmentPendingLaunchVelocity(float DeltaTime)
+{
+	auto AxisCheck = [](float& InValue, float DeltaTime)
+	{//与0的差距是否为1
+		if (FMath::IsNearlyEqual(InValue,0.f,1.f))
+		{
+			InValue = 0.f;
+		}
+		else if (InValue>0.f)
+		{
+			InValue -= InValue * DeltaTime;
+		}
+		else if (InValue<0.f)
+		{
+			InValue += -InValue * DeltaTime;
+		}
+
+	};
+	AxisCheck(PendingLaunchVelocity.X, DeltaTime);
+	AxisCheck(PendingLaunchVelocity.Y, DeltaTime);
+	AxisCheck(PendingLaunchVelocity.Z, DeltaTime);
+}
+
+float UClimbingComponent::Scanning(FHitResult& HitResult, TFunction<void(FVector&, FVector&)> TraceLocation)
+{
+	TArray<AActor*> Ignores1;
+	float TraceDistance = MaxDistance;
+
+	FVector StartTraceChestLocation ,EndTraceChestLocation;
+
+	TraceLocation(StartTraceChestLocation, EndTraceChestLocation);
+
+	UKismetSystemLibrary::LineTraceSingle(
+		GetWorld(),
+		StartTraceChestLocation,
+		EndTraceChestLocation,
+		ETraceTypeQuery::TraceTypeQuery1,//查询通道
+		false,//false:简单碰撞
+		Ignores1,
+		EDrawDebugTrace::Type::ForOneFrame,//ForOneFrame一帧绘制 None不绘制
+		HitResult,
+		true);//忽略自身
+	if (HitResult.bBlockingHit)
+	{
+		TraceDistance = FVector::Distance(StartTraceChestLocation, HitResult.Location);
+	}
+	return TraceDistance;
 }
 
 void UClimbingComponent::ReleaseClimbing()
@@ -393,5 +596,20 @@ void UClimbingComponent::ClearClimbingState()
 
 bool UClimbingComponent::IsLowClimbing()
 {
-	return ClimbingHeight <= 40.f;
+	return ClimbingHeight > 30.f;
+}
+
+void UClimbingComponent::DropClimbingState()
+{
+	ClimbingState = EClimbingState::CLIMBING_DROP;
+}
+
+bool UClimbingComponent::IsDropClimbingState()
+{
+	return ClimbingState == EClimbingState::CLIMBING_DROP;
+}
+
+void UClimbingComponent::ResetClimbingState()
+{
+	ClimbingState = EClimbingState::CLIMBING_CLIMBING;
 }
