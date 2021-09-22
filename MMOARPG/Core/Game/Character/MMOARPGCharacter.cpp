@@ -173,16 +173,28 @@ void AMMOARPGCharacter::MulticastActionSwitch_Implementation()
 void AMMOARPGCharacter::CharacterJump()
 {
 	Jump();
-	if (ActionState==ECharacterActionState::CLIMB_STATE)
-	{
-		GetClimbingComponent()->ResetJump();
-	}
+	CharacterJumpToServer();
 }
 
 
 void AMMOARPGCharacter::CharacterStopJumping()
 {
 	StopJumping();
+}
+
+
+void AMMOARPGCharacter::CharacterJumpToServer_Implementation()
+{
+	MulticastCharacterJump();
+}
+
+
+void AMMOARPGCharacter::MulticastCharacterJump_Implementation()
+{
+	if (ActionState == ECharacterActionState::CLIMB_STATE)
+	{
+		GetClimbingComponent()->Jump();
+	}
 }
 
 void AMMOARPGCharacter::Fast_Implementation()

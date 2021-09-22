@@ -37,7 +37,7 @@ enum class EClimbingState : uint8
 	CLIMBING_DROP					UMETA(DisplayName = "Drop"),
 	CLIMBING_TRUN					UMETA(DisplayName = "Trun"),
 };
-
+UENUM(BlueprintType)
 enum class EClimbingMontageState : uint8
 {
 	CLIMBING_DASH_D_RM				UMETA(DisplayName = "Climbing Dash Down	"),

@@ -20,6 +20,20 @@ UClimbingComponent::UClimbingComponent()
 {
 }
 
+void UClimbingComponent::SetInputVector_Implementation(float InValue, const FVector& InDirection, bool bRight)
+{
+	if (bRight)
+	{
+		RightInput.Direction = InDirection;
+		RightInput.Value = InValue;
+	}
+	else
+	{
+		ForwardInput.Direction = InDirection;
+		ForwardInput.Value = InValue;
+	}
+}
+
 void UClimbingComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -69,15 +83,25 @@ void UClimbingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		MMOARPGCharacterBase.IsValid() &&
 		CameraComponent.IsValid() &&
 		CapsuleComponent.IsValid())
-	{
-		TraceClimbingState(DeltaTime);
-	}
+		if (CharacterMovementComponent->MovementMode!=MOVE_Flying)
+		{
+			{
+				TraceClimbingState(DeltaTime);
+			}
 
-	bJump.Tick(DeltaTime,true);
-	bWallClimbing.Tick(DeltaTime, true);
-	bTurn.Tick(DeltaTime, true);
+			bJump.Tick(DeltaTime, true);
+			bWallClimbing.Tick(DeltaTime, true);
+			bTurn.Tick(DeltaTime, true);
 
-	AdjustmentPendingLaunchVelocity(DeltaTime);
+			AdjustmentPendingLaunchVelocity(DeltaTime);
+
+			if (CharacterMovementComponent->MovementMode==MOVE_Custom)
+			{
+				UpdateMovement(DeltaTime);
+			}
+
+		}
+
 }
 
 void UClimbingComponent::ResetJump()
@@ -100,7 +124,10 @@ void UClimbingComponent::ClimbingForwardAxis(float InAxisValue)
 			const FRotator YawRotation(Rotation.Pitch, Rotation.Yaw, 0);
 			// get up vector 
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Z);
+
 			MMOARPGCharacterBase->AddMovementInput(Direction, InAxisValue);
+
+			SetInputVector(InAxisValue, Direction, false);
 		}
 	}
 }
@@ -121,6 +148,8 @@ void UClimbingComponent::ClimbingRightAxis(float InAxisValue)
 			// get right vector 
 			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 			MMOARPGCharacterBase->AddMovementInput(Direction, InAxisValue);
+
+			SetInputVector(InAxisValue, Direction, true);
 		}
 	}
 }
@@ -577,6 +606,98 @@ float UClimbingComponent::Scanning(FHitResult& HitResult, TFunction<void(FVector
 		TraceDistance = FVector::Distance(StartTraceChestLocation, HitResult.Location);
 	}
 	return TraceDistance;
+}
+
+void UClimbingComponent::UpdateMovement(float InDeltaTime)
+{
+	if (MMOARPGCharacterBase->GetLocalRole()==ENetRole::ROLE_Authority)
+	{
+		{
+			MMOARPGCharacterBase->AddMovementInput(RightInput.Direction,RightInput.Value);
+		}
+		{
+			MMOARPGCharacterBase->AddMovementInput(ForwardInput.Direction, ForwardInput.Value);
+		}
+	}
+}
+
+EClimbingMontageState UClimbingComponent::CalculationClimbingJumpState()
+{
+	//FVector2D Axis(InCMC->Velocity.Y, InCMC->Velocity.Z);
+	FVector2D Axis(CharacterMovementComponent->GetLastInputVector().Y, CharacterMovementComponent->GetLastInputVector().Z);
+
+	//区分
+	FVector2D XAxis(1.f, 0.f);
+	Axis.Normalize();
+	float CosValueX = FVector2D::DotProduct(Axis, XAxis);
+	float XAxisCosAngle = (180.f) / PI * FMath::Acos(CosValueX);
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.04f, FColor::Red, FString::SanitizeFloat(XAxisCosAngle));
+	}
+
+	//区分
+	FVector2D YAxis(0.f, 1.f);
+	Axis.Normalize();
+	float CosValueY = FVector2D::DotProduct(Axis, YAxis);
+	float YAxisCosAngle = (180.f) / PI * FMath::Acos(CosValueY);
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.04f, FColor::Red, FString::SanitizeFloat(YAxisCosAngle));
+	}
+	//判断数值是否在范围内
+	bool bUpAxis = FMath::IsWithinInclusive(YAxisCosAngle, 0.f, 90.f);
+
+	if (FMath::IsWithinInclusive(XAxisCosAngle, 22.5f, 67.5f) && bUpAxis)
+	{
+		return EClimbingMontageState::CLIMBING_DASH_UR_RM;
+	}
+	else if (FMath::IsWithinInclusive(XAxisCosAngle, 112.5f, 157.5f) && !bUpAxis)
+	{
+		return EClimbingMontageState::CLIMBING_DASH_DL_RM;
+	}
+	else if (FMath::IsWithinInclusive(XAxisCosAngle, 22.5f, 67.5f) && !bUpAxis)
+	{
+		return EClimbingMontageState::CLIMBING_DASH_DR_RM;
+	}
+	else if (FMath::IsWithinInclusive(XAxisCosAngle, 112.5f, 157.5f) && bUpAxis)
+	{
+		return EClimbingMontageState::CLIMBING_DASH_UL_RM;
+	}
+	else if (FMath::IsWithinInclusive(XAxisCosAngle, 67.5f, 112.5f) && bUpAxis)
+	{
+		return EClimbingMontageState::CLIMBING_DASH_U_RM;
+	}
+	else if (FMath::IsWithinInclusive(XAxisCosAngle, 67.5f, 112.5f) && !bUpAxis)
+	{
+		return EClimbingMontageState::CLIMBING_DASH_D_RM;
+	}
+	else if (FMath::IsWithinInclusive(XAxisCosAngle, 157.5f, 180.f))
+	{
+		return EClimbingMontageState::CLIMBING_DASH_L_RM;
+	}
+	else if (FMath::IsWithinInclusive(XAxisCosAngle, 0.f, 22.5f))
+	{
+		return EClimbingMontageState::CLIMBING_DASH_R_RM;
+	}
+	return EClimbingMontageState::CLIMBING_DASH_MAX;
+}
+
+void UClimbingComponent::Jump()
+{
+	EClimbingMontageState ClimbingMontageState = CalculationClimbingJumpState();
+	JumpToServer(ClimbingMontageState);
+}
+
+void UClimbingComponent::JumpToServer_Implementation(EClimbingMontageState InMontageState)
+{
+	MulticastJump(InMontageState);
+}
+
+void UClimbingComponent::MulticastJump_Implementation(EClimbingMontageState InMontageState)
+{
+	ResetJump();
+	MontageState = InMontageState;
 }
 
 void UClimbingComponent::ReleaseClimbing()

@@ -27,6 +27,8 @@ public:
 		EDodgeFly DodgeFly;
 
 		FResultBool bLand;
+
+		FResultBool bDodgeFly;
 public:	
 	// Sets default values for this component's properties
 	UFlyComponent();

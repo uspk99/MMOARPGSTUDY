@@ -15,6 +15,16 @@ class MMOARPG_API UClimbingComponent : public UMotionComponent
 {
 	GENERATED_BODY()
 
+	struct FClimbingInput
+	{
+		FClimbingInput()
+			:Value(0.f)
+			,Direction(FVector::ZeroVector)
+		{}
+		float Value;
+		FVector Direction;
+	};
+
 public:
 	UClimbingComponent();
 
@@ -23,6 +33,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		bool bJumpToClimbing;
+
+	//TCP
+	UFUNCTION(Server,Reliable)
+	void SetInputVector(float InValue,const FVector& InDirection,bool bRight);
 
 	FResultBool bJump;
 
@@ -79,4 +93,23 @@ private:
 	EClimbTurnState TurnState;
 
 	FResultBool bTurn;
+
+	void UpdateMovement(float InDeltaTime);
+
+	FClimbingInput ForwardInput;
+	FClimbingInput RightInput;
+
+
+	EClimbingMontageState CalculationClimbingJumpState();
+	EClimbingMontageState MontageState;
+public:
+	void Jump();
+
+	UFUNCTION(Server, Reliable)
+	void JumpToServer(EClimbingMontageState InMontageState);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastJump(EClimbingMontageState InMontageState);
+
+	EClimbingMontageState GetMontageState() { return MontageState; }
 };

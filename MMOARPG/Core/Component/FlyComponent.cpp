@@ -44,9 +44,11 @@ void UFlyComponent::BeginPlay()
 			{
 				if (MMOARPGCharacterBase.IsValid())
 				{
-					MMOARPGCharacterBase->ResetActionState(ECharacterActionState::FLIGHT_STATE);
+					MMOARPGCharacterBase->ResetActionState(ECharacterActionState::NORMAL_STATE);
 					ResetFly();
 				}});
+
+		bDodgeFly.Fun.BindLambda([&]() {DodgeFly = EDodgeFly::DODGE_NONE; });
 	}
 }
 
@@ -105,6 +107,7 @@ void UFlyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		}
 		//着地计时
 		bLand.Tick(DeltaTime,true);
+		bDodgeFly.Tick(DeltaTime, true);
 	}
 }
 
@@ -136,6 +139,9 @@ void UFlyComponent::Reset()
 	//回调俯仰角
 	FRotator NewRot = MMOARPGCharacterBase->GetActorRotation();
 	NewRot.Pitch = 0.f;
+
+	NewRot.Roll = 0.f;
+
 	MMOARPGCharacterBase->SetActorRotation(NewRot);
 
 }

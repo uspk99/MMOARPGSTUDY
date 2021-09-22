@@ -23,7 +23,9 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	SwimmingComponent = CreateDefaultSubobject<USwimmingComponent>(TEXT("SwimmingComponent"));
 	ClimbingComponent = CreateDefaultSubobject<UClimbingComponent>(TEXT("ClimbingComponent"));
 	//FlyComponent->SetupAttachment(RootComponent);
-
+	
+	//爬行可同步.
+	ClimbingComponent->SetIsReplicated(true);
 }
 
 // Called when the game starts or when spawned

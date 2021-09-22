@@ -89,7 +89,9 @@ void UMMOARPGClimbingAnimInstance::ClimbJump()
 {
 	if (AMMOARPGCharacterBase* InCharacterBase = Cast<AMMOARPGCharacterBase>(TryGetPawnOwner()))
 	{
-		EClimbingMontageState JumpState = CalculationClimbingJumpState();
+
+		//EClimbingMontageState JumpState = CalculationClimbingJumpState();
+		EClimbingMontageState JumpState = InCharacterBase->GetClimbingComponent()->GetMontageState();
 		if (JumpState!=EClimbingMontageState::CLIMBING_DASH_MAX)
 		{
 			InCharacterBase->ClimbingMontageChanged(JumpState);
@@ -98,14 +100,19 @@ void UMMOARPGClimbingAnimInstance::ClimbJump()
 }
 
 EClimbingMontageState UMMOARPGClimbingAnimInstance::CalculationClimbingJumpState()
-{
+{//废弃 移植到组件
+#if 1
 	if (AMMOARPGCharacterBase* InCharacterBase = Cast<AMMOARPGCharacterBase>(TryGetPawnOwner()))
 	{
 		if (UCharacterMovementComponent* InCMC = Cast<UCharacterMovementComponent>(InCharacterBase->GetMovementComponent()))
 		{
-			
+			//获取本地坐标
+			FVector NewInputVector = InCharacterBase->GetTransform().InverseTransformPosition(InCMC->GetLastInputVector()
+				+ InCharacterBase->GetActorLocation());
+			FVector2D Axis(NewInputVector.Y, NewInputVector.Z);
+
 			//FVector2D Axis(InCMC->Velocity.Y, InCMC->Velocity.Z);
-			FVector2D Axis(InCMC->GetLastInputVector().Y, InCMC->GetLastInputVector().Z);
+			//FVector2D Axis(InCMC->GetLastInputVector().Y, InCMC->GetLastInputVector().Z);
 			
 			//区分
 			FVector2D XAxis(1.f, 0.f);
@@ -163,5 +170,7 @@ EClimbingMontageState UMMOARPGClimbingAnimInstance::CalculationClimbingJumpState
 			}
 		}
 	}
+	
+#endif
 	return EClimbingMontageState::CLIMBING_DASH_MAX;
 }

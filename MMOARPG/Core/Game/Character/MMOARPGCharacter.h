@@ -76,6 +76,13 @@ protected:
 	void CharacterJump();
 	void CharacterStopJumping();
 
+//跳跃同步
+	UFUNCTION(Server,Reliable)
+	void CharacterJumpToServer();
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastCharacterJump();
+
+	
 //加减速
 	UFUNCTION(Server, Reliable)
 	void Fast();
