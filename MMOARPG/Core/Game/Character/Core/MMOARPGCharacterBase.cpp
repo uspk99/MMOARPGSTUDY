@@ -10,6 +10,25 @@
 #include "../../../../Core/Component/SwimmingComponent.h"
 #include "../../../../Core/Component/ClimbingComponent.h"
 #include "../../../../Core/Component/FightComponent.h"
+#include "../../Abilities/MMOARPGAbilitySystemComponent.h"
+#include "GameplayAbilitySpec.h"
+
+
+void AMMOARPGCharacterBase::NormalAttack(const FName& InKey)
+{
+	GetFightComponent()->NormalAttack(InKey);
+}
+
+void AMMOARPGCharacterBase::ComboAttack(const FName& InKey)
+{
+	NormalAttack(InKey);
+}
+
+FSimpleComboCheck* AMMOARPGCharacterBase::GetSimpleComboInfo()
+{
+	return GetFightComponent()->GetSimpleComboInfo();
+}
+
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	:ActionState(ECharacterActionState::NORMAL_STATE)
@@ -26,8 +45,15 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	//FlyComponent->SetupAttachment(RootComponent);
 	FightComponent = CreateDefaultSubobject<UFightComponent >(TEXT("FightComponent "));
 
+	AbilitySystemComponent = CreateDefaultSubobject<UMMOARPGAbilitySystemComponent >(TEXT("AbilitySystemComponent "));
 	//爬行可同步.
 	ClimbingComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetIsReplicated(true);
+}
+
+UAbilitySystemComponent* AMMOARPGCharacterBase::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 // Called when the game starts or when spawned
@@ -54,8 +80,9 @@ void AMMOARPGCharacterBase::BeginPlay()
 				} 
 			}
 
-		}
+		}	
 	}
+
 }
 
 // Called every frame

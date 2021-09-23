@@ -8,6 +8,9 @@
 #include "CombatInterface/SimpleCombatInterface.h"
 #include "MMOARPG/MMOARPGGameType.h"
 #include "UObject/ObjectPtr.h"
+#include "AbilitySystemInterface.h"
+#include "Abilities/GameplayAbility.h"
+#include "SImpleComboType.h"
 #include "MMOARPGCharacterBase.generated.h"
 
 
@@ -15,8 +18,9 @@ class UFlyComponent;
 class USwimmingComponent;
 class UClimbingComponent;
 class UFightComponent;
+class UMMOARPGAbilitySystemComponent;
 UCLASS()
-class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombatInterface
+class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleComboInterface,public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 		
@@ -34,9 +38,24 @@ class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombat
 	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UFightComponent>FightComponent;
 
+	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<UMMOARPGAbilitySystemComponent> AbilitySystemComponent;
+
+
+
+public:
+	UFUNCTION(BlueprintCallable)
+	void NormalAttack(const FName& InKey);
+
+	virtual void ComboAttack(const FName& InKey);
+
+	virtual FSimpleComboCheck* GetSimpleComboInfo();
+
 public:
 	// Sets default values for this character's properties
 	AMMOARPGCharacterBase();
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
 
 	virtual void AnimSignal(int32 InSignal);
 

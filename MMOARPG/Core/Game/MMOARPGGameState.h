@@ -6,8 +6,8 @@
 #include "GameFramework/GameState.h"
 #include "../../DataTable/CharacterAnimTable.h"
 #include "../../DataTable/CharacterStyleTable.h"
+#include "../../DataTable/CharacterSkillTable.h"
 #include "MMOARPGGameState.generated.h"
-
 /**
  * 
  */
@@ -27,6 +27,11 @@ public:
 		FCharacterStyleTable* GetCharacterStyleTable(int32 InStyleTableID);
 		//获取表
 		TArray<FCharacterStyleTable*>* GetCharacterStyleTables();
+
+		//获取表中内容
+		FCharacterSkillTable* GetCharacterSkillTable(int32 InStyleTableID);
+		//获取表
+		TArray<FCharacterSkillTable*>* GetCharacterSkillTables();
 protected:
 		//模板
 		template<class T>
@@ -74,8 +79,13 @@ protected:
 
 	UPROPERTY()
 		UDataTable* CharacterStyleTablePtr;
+
+	UPROPERTY()
+		UDataTable* CharacterSkillTablePtr;
 	//缓存
 	TArray<FCharacterAnimTable*> CharacterAnimTables;
 
 	TArray<FCharacterStyleTable*> CharacterStyleTables;
+
+	TArray<FCharacterSkillTable*> CharacterSkillTables;
 };

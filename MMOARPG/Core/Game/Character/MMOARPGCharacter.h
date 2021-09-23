@@ -104,6 +104,14 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFastReleased();
 
+public:
+	void MouseLeftClick();
+	void MouseRightClick();
+	void MouseLeftClickReleased();
+	void MouseRightClickReleased();
+
+	virtual void AnimSignal(int32 InSignal);
+
 	//×óÓÒ»ØÐý
 	UFUNCTION(Server, Reliable)
 	void DodgeLeft();

@@ -4,6 +4,7 @@
 #include "MMOARPGGameState.h"
 
 
+
 AMMOARPGGameState::AMMOARPGGameState()
 {
 	static ConstructorHelpers::FObjectFinder<UDataTable> CharacterAnimTable(
@@ -12,6 +13,10 @@ AMMOARPGGameState::AMMOARPGGameState()
 	static ConstructorHelpers::FObjectFinder<UDataTable> CharacterStyleTable(
 		TEXT("/Game/DataTable/CharacterStyleTable"));
 	CharacterStyleTablePtr = CharacterStyleTable.Object;
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> CharacterSkillTable(
+		TEXT("/Game/DataTable/CharacterSkillTable"));
+	CharacterSkillTablePtr = CharacterSkillTable.Object;
 }
 
 FCharacterAnimTable* AMMOARPGGameState::GetCharacterAnimTable(int32 InAnimTableID)
@@ -46,4 +51,21 @@ TArray<FCharacterStyleTable*>* AMMOARPGGameState::GetCharacterStyleTables()
 		CharacterStyleTablePtr,
 		CharacterStyleTables,
 		TEXT("CharacterTable"));
+}
+
+FCharacterSkillTable* AMMOARPGGameState::GetCharacterSkillTable(int32 InSkillID)
+{
+	return GetTable<FCharacterSkillTable>(
+		InSkillID,
+		CharacterSkillTablePtr,
+		CharacterSkillTables,
+		TEXT("SkillTable"));
+}
+
+TArray<FCharacterSkillTable*>* AMMOARPGGameState::GetCharacterSkillTables()
+{
+	return GetTables<FCharacterSkillTable>(
+		CharacterSkillTablePtr,
+		CharacterSkillTables,
+		TEXT("SkillTable"));
 }
