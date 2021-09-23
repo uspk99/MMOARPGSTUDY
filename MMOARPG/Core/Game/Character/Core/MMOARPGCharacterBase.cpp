@@ -9,6 +9,7 @@
 #include "MMOARPG/Core/Component/FlyComponent.h"
 #include "../../../../Core/Component/SwimmingComponent.h"
 #include "../../../../Core/Component/ClimbingComponent.h"
+#include "../../../../Core/Component/FightComponent.h"
 // Sets default values
 AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	:ActionState(ECharacterActionState::NORMAL_STATE)
@@ -23,7 +24,8 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	SwimmingComponent = CreateDefaultSubobject<USwimmingComponent>(TEXT("SwimmingComponent"));
 	ClimbingComponent = CreateDefaultSubobject<UClimbingComponent>(TEXT("ClimbingComponent"));
 	//FlyComponent->SetupAttachment(RootComponent);
-	
+	FightComponent = CreateDefaultSubobject<UFightComponent >(TEXT("FightComponent "));
+
 	//爬行可同步.
 	ClimbingComponent->SetIsReplicated(true);
 }
@@ -113,9 +115,9 @@ void AMMOARPGCharacterBase::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	//if (LastActionState==ECharacterActionState::CLIMB_STATE)
+	if (LastActionState==ECharacterActionState::CLIMB_STATE)
 	{
-		StopAnimMontage();
+		//StopAnimMontage();
 	}
 
 }

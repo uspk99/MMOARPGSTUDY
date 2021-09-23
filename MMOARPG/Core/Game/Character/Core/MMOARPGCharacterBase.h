@@ -14,6 +14,7 @@
 class UFlyComponent;
 class USwimmingComponent;
 class UClimbingComponent;
+class UFightComponent;
 UCLASS()
 class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombatInterface
 {
@@ -29,6 +30,9 @@ class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleCombat
 
 	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UClimbingComponent>ClimbingComponent;
+
+	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<UFightComponent>FightComponent;
 
 public:
 	// Sets default values for this character's properties
@@ -64,7 +68,7 @@ public:
 	FORCEINLINE UFlyComponent* GetFlyComponent() { return FlyComponent; }
 	FORCEINLINE USwimmingComponent* GetSwimmingComponent() { return SwimmingComponent; }
 	FORCEINLINE UClimbingComponent* GetClimbingComponent() { return ClimbingComponent; }
-
+	FORCEINLINE UFightComponent* GetFightComponent() { return FightComponent; }
 	void SetUserID(int32 InUserID) { UserID = InUserID; };
 
 	void ResetActionState(ECharacterActionState InActionState);
