@@ -10,6 +10,12 @@
 #include "FightComponent.generated.h"
 
 class UMMOARPGGameplayAbility;
+enum EGameplayAbilityType
+{
+	GAMEPLAYABILITY_SKILLATTACK,
+	GAMEPLAYABILITY_COMBOATTACK,
+
+};
 /**
  * 
  */
@@ -26,6 +32,13 @@ class MMOARPG_API UFightComponent : public UMotionComponent
 public:
 	UFightComponent();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Press();
+	UFUNCTION(NetMulticast, Reliable)
+	void Released();
+	UFUNCTION(NetMulticast, Reliable)
+	void Reset();
+
 	UFUNCTION(BlueprintCallable)
 		void NormalAttack(const FName& InKey);
 
@@ -35,6 +48,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	void AddMMOARPGGameplayAbility(const FName& InKey,EGameplayAbilityType InType = EGameplayAbilityType::GAMEPLAYABILITY_SKILLATTACK);
 	//技能添加接口
 	FGameplayAbilitySpecHandle AddAbility(TSubclassOf<UGameplayAbility> InNewAbility);
 	//技能获取接口

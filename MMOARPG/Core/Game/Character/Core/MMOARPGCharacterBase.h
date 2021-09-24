@@ -104,7 +104,8 @@ protected:
 
 	//动作状态
 	UPROPERTY(ReplicatedUsing = OnRep_ActionStateChanged)
-	ECharacterActionState ActionState;
+		ECharacterActionState ActionState;
+
 	//上一次动作
 	UPROPERTY()
 	ECharacterActionState LastActionState;

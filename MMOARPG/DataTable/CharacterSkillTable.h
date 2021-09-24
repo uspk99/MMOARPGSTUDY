@@ -19,4 +19,10 @@ struct FCharacterSkillTable :public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly,Category="CharacterSkill")
 	TSubclassOf<UGameplayAbility> NormalAttack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
+	TMap<FName, TSubclassOf<UGameplayAbility>> ComboAttack;
+
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
+	TMap<FName, TSubclassOf<UGameplayAbility>> SkillAttack;
 };

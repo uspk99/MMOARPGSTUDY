@@ -44,7 +44,7 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase()
 	ClimbingComponent = CreateDefaultSubobject<UClimbingComponent>(TEXT("ClimbingComponent"));
 	//FlyComponent->SetupAttachment(RootComponent);
 	FightComponent = CreateDefaultSubobject<UFightComponent >(TEXT("FightComponent "));
-
+	FightComponent->SetIsReplicated(true);
 	AbilitySystemComponent = CreateDefaultSubobject<UMMOARPGAbilitySystemComponent >(TEXT("AbilitySystemComponent "));
 	//爬行可同步.
 	ClimbingComponent->SetIsReplicated(true);
@@ -112,27 +112,27 @@ void AMMOARPGCharacterBase::ResetActionState(ECharacterActionState InActionState
 	}
 }
 
-void AMMOARPGCharacterBase::OnRep_ActionStateChanged()
-{
-
-}
 
 void AMMOARPGCharacterBase::SwitchActionStateOnServer_Implementation(ECharacterActionState InActionState)
 {
 	//bFight = bNewFight;
 	ActionState = InActionState;
-
 	LastActionState = ActionState;
+
+
+}
+
+void AMMOARPGCharacterBase::OnRep_ActionStateChanged()
+{
+
 }
 
 void AMMOARPGCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
 	//更新变量   只更新模拟玩家
 	DOREPLIFETIME_CONDITION(AMMOARPGCharacterBase, ActionState, COND_SimulatedOnly);
 }
-
 void AMMOARPGCharacterBase::AnimSignal(int32 InSignal)
 {
 	K2_AnimSignal(InSignal);

@@ -15,6 +15,21 @@ UFightComponent::UFightComponent()
 
 }
 
+void UFightComponent::Press_Implementation()
+{
+	ComboAttack.Press();
+}
+
+void UFightComponent::Released_Implementation()
+{
+	ComboAttack.Released();
+}
+
+void UFightComponent::Reset_Implementation()
+{
+	ComboAttack.Reset();
+}
+
 void UFightComponent::NormalAttack(const FName &InKey)
 {
 	//弱指针
@@ -34,23 +49,54 @@ void UFightComponent::BeginPlay()
 	{
 		AbilitySystemComponent =Cast<UMMOARPGAbilitySystemComponent>(MMOARPGCharacterBase->GetAbilitySystemComponent());
 
-		if (GetWorld())
+		const FName InKey = TEXT("NormalAttack");
+		//服务器
+		if (MMOARPGCharacterBase->GetLocalRole()==ENetRole::ROLE_Authority)
 		{
-			if (AMMOARPGGameState* InGameState = GetWorld()->GetGameState<AMMOARPGGameState>())
+			
+			if (GetWorld())
 			{
-				//添加固有技能
-				if (FCharacterSkillTable* InSkillTable = InGameState->GetCharacterSkillTable(MMOARPGCharacterBase->GetID()))
-				{
-					Skills.Add(TEXT("NormalAttack"), AddAbility(InSkillTable->NormalAttack));
-				}
-			}
-			//注册
-			AbilitySystemComponent->InitAbilityActorInfo(MMOARPGCharacterBase.Get(), MMOARPGCharacterBase.Get());
+				AddMMOARPGGameplayAbility(InKey, EGameplayAbilityType::GAMEPLAYABILITY_COMBOATTACK);
+				//注册
+				AbilitySystemComponent->InitAbilityActorInfo(MMOARPGCharacterBase.Get(), MMOARPGCharacterBase.Get());
+			}	
 		}
-		RegisterComboAttack(ComboAttack, TEXT("NormalAttack"));
-
+		//本地注册combo
+		RegisterComboAttack(ComboAttack, InKey);
 	}
 
+}
+
+void UFightComponent::AddMMOARPGGameplayAbility(const FName& InKey, EGameplayAbilityType InType)
+{
+	if (AMMOARPGGameState* InGameState = GetWorld()->GetGameState<AMMOARPGGameState>())
+	{
+		//添加固有连击
+		if (FCharacterSkillTable* InSkillTable = InGameState->GetCharacterSkillTable(MMOARPGCharacterBase->GetID()))
+		{
+			auto GetMMOARPGGameplayAbility = [&](EGameplayAbilityType InType)->TMap<FName, TSubclassOf<UGameplayAbility>>*
+			{
+				switch (InType)
+				{
+				case GAMEPLAYABILITY_SKILLATTACK:
+					return &InSkillTable->SkillAttack;
+					break;
+				case GAMEPLAYABILITY_COMBOATTACK:
+					return &InSkillTable->ComboAttack;
+					break;
+				}
+				return NULL;
+			};
+
+			if (TMap<FName, TSubclassOf<UGameplayAbility>> *NewGameplayAbilitys = GetMMOARPGGameplayAbility(InType))
+			{
+				if (TSubclassOf<UGameplayAbility>* InAbility = NewGameplayAbilitys->Find(InKey))
+				{
+					Skills.Add(InKey, AddAbility(*InAbility));
+				}
+			}
+		}
+	}
 }
 
 FGameplayAbilitySpecHandle UFightComponent::AddAbility(TSubclassOf<UGameplayAbility> InNewAbility)

@@ -70,7 +70,7 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMMOARPGCharacter::CharacterJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AMMOARPGCharacter::CharacterStopJumping);
 
-	PlayerInputComponent->BindAction("SwitchFight", IE_Pressed, this, &AMMOARPGCharacter::SwitchFight);
+	PlayerInputComponent->BindAction("SwitchFight", IE_Pressed, this, &AMMOARPGCharacter::ActionSwitchFight);
 	PlayerInputComponent->BindAction("ActionSwitch", IE_Pressed, this, &AMMOARPGCharacter::ActionSwitch);
 	PlayerInputComponent->BindAction("Fast", IE_Pressed, this, &AMMOARPGCharacter::Fast);
 	PlayerInputComponent->BindAction("Fast", IE_Released, this, &AMMOARPGCharacter::FastReleased);
@@ -131,12 +131,27 @@ void AMMOARPGCharacter::SwitchFight()
 	ResetActionState(ECharacterActionState::FIGHT_STATE);
 	//客户端播放
 	FightChanged();
+	
 	//通知服务器
 	SwitchActionStateOnServer(ActionState);
-
+	//FightChangedNew();
+	//
 	LastActionState = ActionState;
 }
 
+
+void AMMOARPGCharacter::ActionSwitchFight_Implementation()
+{
+	MulticastActionSwitchFight();
+}
+
+
+void AMMOARPGCharacter::MulticastActionSwitchFight_Implementation()
+{
+	ResetActionState(ECharacterActionState::FIGHT_STATE);
+	FightChanged();
+	LastActionState = ActionState;
+}
 
 void AMMOARPGCharacter::ActionSwitch_Implementation()
 {
@@ -344,6 +359,7 @@ void AMMOARPGCharacter::FightChanged()
 }
 
 
+
 void AMMOARPGCharacter::ClimbingMontageChanged(EClimbingMontageState InJumpState)
 {
 	if (FCharacterAnimTable* InAnimTable = GetAnimTable())
@@ -357,25 +373,29 @@ void AMMOARPGCharacter::ClimbingMontageChanged(EClimbingMontageState InJumpState
 }
 
 
-void AMMOARPGCharacter::MouseLeftClick()
+void AMMOARPGCharacter::MouseLeftClick_Implementation()
 {
-	GetSimpleComboInfo()->Press();
+	if (ActionState==ECharacterActionState::FIGHT_STATE)
+	{;
+		GetFightComponent()->Press();
+	}
+
 }
 
 
-void AMMOARPGCharacter::MouseRightClick()
+void AMMOARPGCharacter::MouseRightClick_Implementation()
 {
 
 }
 
 
-void AMMOARPGCharacter::MouseLeftClickReleased()
+void AMMOARPGCharacter::MouseLeftClickReleased_Implementation()
 {
-	GetSimpleComboInfo()->Released();
+	GetFightComponent()->Released();
 }
 
 
-void AMMOARPGCharacter::MouseRightClickReleased()
+void AMMOARPGCharacter::MouseRightClickReleased_Implementation()
 {
 
 }
@@ -384,9 +404,9 @@ void AMMOARPGCharacter::MouseRightClickReleased()
 void AMMOARPGCharacter::AnimSignal(int32 InSignal)
 {
 	Super::AnimSignal(InSignal);
-	if (InSignal==2)
+	if (InSignal == 2)
 	{
-		GetSimpleComboInfo()->Reset();
+		GetFightComponent()->Reset();
 	}
 }
 
@@ -417,15 +437,18 @@ void AMMOARPGCharacter::MulticastDodgeRight_Implementation()
 
 void AMMOARPGCharacter::OnRep_ActionStateChanged()
 {
+#if 0
 	if (GetLocalRole() != ROLE_Authority)
 	{
-		//切换
-		if (ActionState==ECharacterActionState::FIGHT_STATE||
+		if (ActionState == ECharacterActionState::FIGHT_STATE ||
 			LastActionState == ECharacterActionState::FIGHT_STATE)
 		{
 			FightChanged();
 		}
-		//收尾
-		LastActionState = ActionState;	
+
+		LastActionState = ActionState;
 	}
+#endif
+
+
 }

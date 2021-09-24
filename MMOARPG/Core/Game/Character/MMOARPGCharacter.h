@@ -67,6 +67,12 @@ protected:
 
 	void SwitchFight();
 
+	UFUNCTION(Server, Reliable)
+		void ActionSwitchFight();
+	//服务器广播
+	UFUNCTION(NetMulticast, Reliable)
+		void MulticastActionSwitchFight();
+
 	UFUNCTION(Server,Reliable)
 	void ActionSwitch();
 	//服务器广播
@@ -105,10 +111,17 @@ protected:
 	void MulticastFastReleased();
 
 public:
+	UFUNCTION(Server, Reliable)
 	void MouseLeftClick();
+
+	UFUNCTION(Server, Reliable)
 	void MouseRightClick();
+	UFUNCTION(Server, Reliable)
 	void MouseLeftClickReleased();
+	UFUNCTION(Server, Reliable)
 	void MouseRightClickReleased();
+
+
 
 	virtual void AnimSignal(int32 InSignal);
 
@@ -128,6 +141,7 @@ protected:
 
 	virtual void OnRep_ActionStateChanged();
 	void FightChanged();
+
 public:
 
 	virtual void ClimbingMontageChanged(EClimbingMontageState InJumpState);

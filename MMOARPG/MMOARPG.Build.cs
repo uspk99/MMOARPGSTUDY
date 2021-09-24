@@ -20,6 +20,7 @@ public class MMOARPG : ModuleRules
             "SlateCore",
 			"SimpleActorBrowsing",
 			"SimpleCombat",
+			"SimpleOcean",
 			"SimpleAdvancedAnimation",
 			"GameplayAbilities",
 			"GameplayTasks"});
