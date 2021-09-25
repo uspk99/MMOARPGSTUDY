@@ -12,6 +12,7 @@
 #include "../../../../Core/Component/FightComponent.h"
 #include "../../Abilities/MMOARPGAbilitySystemComponent.h"
 #include "GameplayAbilitySpec.h"
+#include "../../../../Core/Component/GameFramework/MMOARPGMovementComponent.h"
 
 
 void AMMOARPGCharacterBase::NormalAttack(const FName& InKey)
@@ -30,8 +31,9 @@ FSimpleComboCheck* AMMOARPGCharacterBase::GetSimpleComboInfo()
 }
 
 // Sets default values
-AMMOARPGCharacterBase::AMMOARPGCharacterBase()
-	:ActionState(ECharacterActionState::NORMAL_STATE)
+AMMOARPGCharacterBase::AMMOARPGCharacterBase(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer.SetDefaultSubobjectClass<UMMOARPGMovementComponent>(ACharacter::CharacterMovementComponentName))
+	,ActionState(ECharacterActionState::NORMAL_STATE)
 	,LastActionState(ECharacterActionState::NORMAL_STATE)
 	,ID(INDEX_NONE)
 	,UserID(1)
