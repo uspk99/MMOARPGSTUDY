@@ -26,6 +26,7 @@ void UMMOARPGClimbingAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		ClimbingState = InCharacterBase->GetClimbingComponent()->ClimbingState;
 		bJumpToClimbing = InCharacterBase->GetClimbingComponent()->bJumpToClimbing;
+		bWalkToClimbing= InCharacterBase->GetClimbingComponent()->bWalkToClimbing;
 		bJump = *InCharacterBase->GetClimbingComponent()->bJump;
 		//πÿ¡™ Ù–‘
 		if (UCharacterMovementComponent* InCMC = Cast<UCharacterMovementComponent>(InCharacterBase->GetMovementComponent()))
@@ -81,6 +82,16 @@ void UMMOARPGClimbingAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 				break;
 			}
 			InCharacterBase->GetClimbingComponent()->ResetClimbingState();
+		}
+		else if (bJumpToClimbing)
+		{
+			InCharacterBase->GetClimbingComponent()->bJumpToClimbing = false;
+			InCharacterBase->ClimbingMontageChanged(EClimbingMontageState::CLIMBING_TURN_CORNER_FROMAIR_RM);
+		}
+		else if (bWalkToClimbing)
+		{
+			InCharacterBase->GetClimbingComponent()->bWalkToClimbing = false;
+			InCharacterBase->ClimbingMontageChanged(EClimbingMontageState::CLIMBING_TURN_CORNER_FROMGROUND_RM);
 		}
 	}
 }

@@ -62,6 +62,10 @@ enum class EClimbingMontageState : uint8
 	CLIMBING_TURN_CORNER_INSIDE_R_RM			UMETA(DisplayName = "Turn Corner Inside Right"),
 	CLIMBING_TURN_CORNER_INSIDE_L_RM			UMETA(DisplayName = "Turn Corner Inside Left"),
 
+	CLIMBING_TURN_CORNER_FROMGROUND_RM			UMETA(DisplayName = "walk to Climbing"),
+	CLIMBING_TURN_CORNER_FROMAIR_RM			UMETA(DisplayName = "Jump to Climbing"),
+
+
 	CLIMBING_DASH_MAX				UMETA(DisplayName = "_MAX"),
 };
 

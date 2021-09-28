@@ -9,6 +9,8 @@
 #include "GameFramework/MovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "ThreadManage.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 const float MaxDistance = 9999.f;
 
@@ -16,6 +18,7 @@ UClimbingComponent::UClimbingComponent()
 	:Super()
 	,ClimbingState(EClimbingState::CLIMBING_NONE)
 	, bJumpToClimbing(false)
+	, bWalkToClimbing(false)
 	,ClimbingHeight(0.f)
 {
 }
@@ -99,7 +102,6 @@ void UClimbingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 			{
 				UpdateMovement(DeltaTime);
 			}
-
 		}
 
 }
@@ -334,17 +336,17 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 	{//点能
 		//if (ChestDistance<=75.f && HeadDistance<=75.f)
 		if (ChestDistance <= 45.f)
-		{
-			//薮除
+		{	//薮除
 			float CompensationValue = ChestDistance - 28.f;
 			if (CompensationValue>0.f && ClimbingState!=EClimbingState::CLIMBING_DROP)
 			{
 				FVector TargetPoint = ForwardDireaction * CompensationValue;
 				FVector TargetLocation = 
-					MMOARPGCharacterBase->GetActorLocation()+TargetPoint* (3.f) *DeltaTime;
+					MMOARPGCharacterBase->GetActorLocation()+TargetPoint* (5.f) *DeltaTime;
 
 				MMOARPGCharacterBase->SetActorLocation(TargetLocation);
 			}
+
 			//点能
 			if (ClimbingState == EClimbingState::CLIMBING_CLIMBING)
 			{
@@ -396,6 +398,16 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 			{
 				ClimbingState = EClimbingState::CLIMBING_CLIMBING;
 				Climbing();
+
+				if (!HitGroundResult.bBlockingHit)
+				{
+					bJumpToClimbing=true;
+				}
+				else
+				{
+					bWalkToClimbing=true;
+				}
+
 			}
 			else
 			{
@@ -403,21 +415,6 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 				{
 					ClimbingState = EClimbingState::CLIMBING_NONE;
 				}		
-			}
-			if (!HitGroundResult.bBlockingHit)
-			{
-				if (bJumpToClimbing)
-				{
-					bJumpToClimbing = false;
-				}
-				else
-				{
-					bJumpToClimbing = true;
-				}
-			}
-			else
-			{
-				bJumpToClimbing = false;
 			}
 		}
 	}
@@ -437,7 +434,7 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 			&&ClimbingState!=EClimbingState::CLIMBING_WALLCLIMBING
 			&&!bWallClimbing)
 		{
-			if (ChestDistance<= 26.f)
+			if (ChestDistance<= 18.f)
 			{
 				{//中�鯒�
 					FRotator NewRot = FRotationMatrix::MakeFromX(
@@ -484,7 +481,7 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 					{
 						bWallClimbing = 1.6f;
 					}
-					
+					bWallClimbing = true;
 				}
 
 			}

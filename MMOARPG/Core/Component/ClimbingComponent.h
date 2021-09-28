@@ -34,6 +34,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
 		bool bJumpToClimbing;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimAttrubute")
+		bool bWalkToClimbing;
+
 	//TCP
 	UFUNCTION(Server,Reliable)
 	void SetInputVector(float InValue,const FVector& InDirection,bool bRight);

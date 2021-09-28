@@ -8,6 +8,7 @@ void UMMOARPGMovementComponent::PhysCustom(float deltaTime, int32 Iterations)
 	{
 		return;
 	}
+	
 
 	if (!HasAnimRootMotion())
 	{
