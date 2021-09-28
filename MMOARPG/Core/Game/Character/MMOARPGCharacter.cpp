@@ -142,7 +142,10 @@ void AMMOARPGCharacter::SwitchFight()
 
 void AMMOARPGCharacter::ActionSwitchFight_Implementation()
 {
-	MulticastActionSwitchFight();
+	if (GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Walking)
+	{
+		MulticastActionSwitchFight();
+	}
 }
 
 

@@ -53,6 +53,7 @@ public:
 
 public:
 	// Sets default values for this character's properties
+
 	AMMOARPGCharacterBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;

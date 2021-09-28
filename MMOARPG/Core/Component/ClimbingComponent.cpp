@@ -13,7 +13,7 @@
 #include "Net/UnrealNetwork.h"
 
 const float MaxDistance = 9999.f;
-
+const EDrawDebugTrace::Type DrawDebugTrace = EDrawDebugTrace::Type::None;
 UClimbingComponent::UClimbingComponent()
 	:Super()
 	,ClimbingState(EClimbingState::CLIMBING_NONE)
@@ -86,7 +86,8 @@ void UClimbingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		MMOARPGCharacterBase.IsValid() &&
 		CameraComponent.IsValid() &&
 		CapsuleComponent.IsValid())
-		if (CharacterMovementComponent->MovementMode!=MOVE_Flying)
+		if (CharacterMovementComponent->MovementMode!=MOVE_Flying
+		&& MMOARPGCharacterBase->GetActionState()!=ECharacterActionState::FIGHT_STATE)
 		{
 			{
 				TraceClimbingState(DeltaTime);
@@ -434,7 +435,7 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 			&&ClimbingState!=EClimbingState::CLIMBING_WALLCLIMBING
 			&&!bWallClimbing)
 		{
-			if (ChestDistance<= 18.f)
+			if (ChestDistance<= 25.f)
 			{
 				{//面向墙
 					FRotator NewRot = FRotationMatrix::MakeFromX(
@@ -459,7 +460,7 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 					ETraceTypeQuery::TraceTypeQuery1,//查询通道
 					false,//false:简单碰撞
 					ClimbingActorToIgnore,
-					EDrawDebugTrace::Type::ForOneFrame,//ForOneFrame一帧绘制 None不绘制
+					DrawDebugTrace,//ForOneFrame一帧绘制 None不绘制
 					HitWallClimbing,
 					true);
 				if (HitWallClimbing.bBlockingHit)
@@ -472,7 +473,6 @@ void UClimbingComponent::TraceClimbingState(float DeltaTime)
 					ClimbingState = EClimbingState::CLIMBING_WALLCLIMBING;
 
 					AdjustmentClimbing();
-					bWallClimbing = true;
 					if (IsLowClimbing())
 					{
 						bWallClimbing = 0.8f;
@@ -622,6 +622,11 @@ EClimbingMontageState UClimbingComponent::CalculationClimbingJumpState()
 {
 	//FVector2D Axis(InCMC->Velocity.Y, InCMC->Velocity.Z);
 	FVector2D Axis(CharacterMovementComponent->GetLastInputVector().Y, CharacterMovementComponent->GetLastInputVector().Z);
+
+	if (MMOARPGCharacterBase->GetActorForwardVector().X <0)
+	{
+		Axis.X *= -1.f;
+	}
 
 	//区分
 	FVector2D XAxis(1.f, 0.f);
