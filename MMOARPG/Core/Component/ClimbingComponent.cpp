@@ -101,7 +101,11 @@ void UClimbingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 			if (CharacterMovementComponent->MovementMode==MOVE_Custom)
 			{
-				UpdateMovement(DeltaTime);
+				if (ClimbingState != EClimbingState::CLIMBING_NONE)
+				{
+					UpdateMovement(DeltaTime);
+				}
+
 			}
 		}
 
@@ -539,6 +543,13 @@ void UClimbingComponent::SetClimbingState(EMovementMode InMode, ECharacterAction
 	ActorRotation.Pitch = 0.f;
 	MMOARPGCharacterBase->SetActorRotation(ActorRotation);
 	bJumpToClimbing = false;
+
+	//ÇåÁã²Ù×÷Right Forward
+	RightInput.Direction = FVector::ZAxisVector;
+	RightInput.Value =0.f;
+
+	ForwardInput.Direction=FVector::ZAxisVector;
+	ForwardInput.Value = 0.f;
 }
 
 void UClimbingComponent::AdjustmentClimbing(bool bStart /*= true*/)

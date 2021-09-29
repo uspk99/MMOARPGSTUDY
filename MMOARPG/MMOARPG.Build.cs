@@ -23,6 +23,7 @@ public class MMOARPG : ModuleRules
 			"SimpleOcean",
 			"SimpleAdvancedAnimation",
 			"GameplayAbilities",
+			"GameplayTags",
 			"GameplayTasks"});
 
         bEnableShadowVariableWarnings = false;

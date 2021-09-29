@@ -121,7 +121,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void MouseRightClickReleased();
 
-
+	UFUNCTION(Server, Reliable)
+	void KeyIn1();
 
 	virtual void AnimSignal(int32 InSignal);
 

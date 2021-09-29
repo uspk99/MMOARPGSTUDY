@@ -66,6 +66,7 @@ void AMMOARPGCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 	PlayerInputComponent->BindAction("MouseRightClick", IE_Pressed, this, &AMMOARPGCharacter::MouseRightClick);
 	PlayerInputComponent->BindAction("MouseClick", IE_Released, this, &AMMOARPGCharacter::MouseLeftClickReleased);
 	PlayerInputComponent->BindAction("MouseRightClick", IE_Released, this, &AMMOARPGCharacter::MouseRightClickReleased);
+	PlayerInputComponent->BindAction("KeyIn1", IE_Pressed, this, &AMMOARPGCharacter::KeyIn1);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AMMOARPGCharacter::CharacterJump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AMMOARPGCharacter::CharacterStopJumping);
@@ -166,8 +167,9 @@ void AMMOARPGCharacter::MulticastActionSwitch_Implementation()
 	if (UCharacterMovementComponent* CharacterMovementComponent
 		=Cast<UCharacterMovementComponent>(GetMovementComponent()))
 	{
-		if (CharacterMovementComponent->MovementMode==EMovementMode::MOVE_Flying
+		if ((CharacterMovementComponent->MovementMode==EMovementMode::MOVE_Flying
 			|| CharacterMovementComponent->MovementMode == EMovementMode::MOVE_Walking)
+			&&ActionState!=ECharacterActionState::FIGHT_STATE)//后面优化
 		{
 			ResetActionState(ECharacterActionState::FLIGHT_STATE);
 			GetFlyComponent()->ResetFly();
@@ -178,16 +180,18 @@ void AMMOARPGCharacter::MulticastActionSwitch_Implementation()
 		}
 		else if (CharacterMovementComponent->MovementMode==EMovementMode::MOVE_Custom)
 		{
-			FVector Dir = -GetActorForwardVector();
-			GetClimbingComponent()->LaunchCharacter(Dir * 1000.f);
 			if (!GetClimbingComponent()->IsDropClimbingState())
 			{
+				FVector Dir = -GetActorForwardVector();
+				GetClimbingComponent()->LaunchCharacter(Dir * 1000.f);
 				GetClimbingComponent()->ReleaseClimbing();
 				GetClimbingComponent()->DropClimbingState();
 
 				ClimbingMontageChanged(EClimbingMontageState::CLIMBING_DASH_DROP_RM);
-
 			}
+		}
+		else if (ActionState == ECharacterActionState::FIGHT_STATE)
+		{
 
 		}
 	}
@@ -388,7 +392,7 @@ void AMMOARPGCharacter::MouseLeftClick_Implementation()
 
 void AMMOARPGCharacter::MouseRightClick_Implementation()
 {
-
+	GetFightComponent()->DodgeSkill();
 }
 
 
@@ -403,6 +407,12 @@ void AMMOARPGCharacter::MouseRightClickReleased_Implementation()
 
 }
 
+
+
+void AMMOARPGCharacter::KeyIn1_Implementation()
+{
+	GetFightComponent()->SprintSkill();
+}
 
 void AMMOARPGCharacter::AnimSignal(int32 InSignal)
 {

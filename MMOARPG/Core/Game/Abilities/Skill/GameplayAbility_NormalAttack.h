@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../MMOARPGGameplayAbility.h"
+#include "Core/GameplayAbility_Skill.h"
 #include "GameplayAbility_NormalAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MMOARPG_API UGameplayAbility_NormalAttack : public UMMOARPGGameplayAbility
+class MMOARPG_API UGameplayAbility_NormalAttack : public UGameplayAbility_Skill
 {
 	GENERATED_BODY()
 public:

@@ -17,12 +17,19 @@ struct FCharacterSkillTable :public FTableRowBase
 		UPROPERTY(EditDefaultsOnly,Category="CharacterSkill")
 		int32 ID;
 
-	UPROPERTY(EditDefaultsOnly,Category="CharacterSkill")
-	TSubclassOf<UGameplayAbility> NormalAttack;
 
-	UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
-	TMap<FName, TSubclassOf<UGameplayAbility>> ComboAttack;
+		//UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
+		//	TMap<FName, TSubclassOf<UGameplayAbility>> ComboAttack;
 
-	UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
-	TMap<FName, TSubclassOf<UGameplayAbility>> SkillAttack;
+		//UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
+		//	TMap<FName, TSubclassOf<UGameplayAbility>> SkillAttack;
+
+		UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
+			TArray<TSubclassOf<UGameplayAbility>> ComboAttack;
+
+		UPROPERTY(EditDefaultsOnly, Category = "CharacterSkill")
+			TArray<TSubclassOf<UGameplayAbility>> SkillAttack;
+
+		TSubclassOf<UGameplayAbility>* FindComboAttack(const FName &InKey);
+		TSubclassOf<UGameplayAbility>* FindSkillAttack(const FName& InKey);
 };

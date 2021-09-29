@@ -13,5 +13,15 @@ UCLASS()
 class MMOARPG_API UGameplayAbility_Skill : public UMMOARPGGameplayAbility
 {
 	GENERATED_BODY()
+
+public:
+
+	virtual void OnCompleted();
+
+	virtual void OnBlendOut();
+
+	virtual void OnInterrupted();
+
+	virtual void OnCancelled();
 	
 };

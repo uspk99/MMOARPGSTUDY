@@ -39,6 +39,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Reset();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void DodgeSkill();
+
+	UFUNCTION(NetMulticast, Reliable)
+		void SprintSkill();
+
 	UFUNCTION(BlueprintCallable)
 		void NormalAttack(const FName& InKey);
 
