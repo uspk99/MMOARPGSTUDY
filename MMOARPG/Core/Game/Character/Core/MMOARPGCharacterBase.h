@@ -11,6 +11,8 @@
 #include "AbilitySystemInterface.h"
 #include "Abilities/GameplayAbility.h"
 #include "SImpleComboType.h"
+#include "../../Abilities/MMOARPGAttributeSet.h"
+#include "MMOARPGType.h"
 #include "MMOARPGCharacterBase.generated.h"
 
 
@@ -41,7 +43,8 @@ class MMOARPG_API AMMOARPGCharacterBase : public ACharacter,public ISimpleComboI
 	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UMMOARPGAbilitySystemComponent> AbilitySystemComponent;
 
-
+	UPROPERTY(Category = MMOARPGCharacterBase, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UMMOARPGAttributeSet> AttributeSet;
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -94,6 +97,9 @@ public:
 	void ResetActionState(ECharacterActionState InActionState);
 
 	virtual class UCameraComponent* GetFollowCamera() const { return NULL; }
+
+	UFUNCTION(NetMulticast,Reliable)
+	void UpdateCharacterAttribute(const FMMOARPGCharacterAttribute &CharacterAttribute);
 protected:
 	//服务器，同步
 	UFUNCTION(Server,Reliable)

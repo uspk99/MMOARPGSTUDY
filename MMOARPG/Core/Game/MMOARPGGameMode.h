@@ -44,7 +44,7 @@ private:
 public:
 	void LoginCharacterUpdateKneadingRequest(int32 InUserID);
 
-
+	void GetCharacterDataRequests(int32 InUserID,int32 InCharacterID);
 };
 
 

@@ -1,7 +1,8 @@
-
 #pragma once
 
 #include "Abilities/GameplayAbility.h"
+#include "AbilityTask/AbilityTask_PMAWDamageEvent.h"
+#include "MMOARPGGameplayAbilityType.h"
 #include "MMOARPGGameplayAbility.generated.h"
 
 class UAbilityTask_PlayMontageAndWait;
@@ -15,6 +16,9 @@ public:
 	//子类去具体实现
 	UPROPERTY(EditDefaultsOnly,Category= MontageAbility)
 	UAnimMontage* MontageToPlay;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameplayEffects)
+	TMap<FGameplayTag,FMMOARPGGameplayEffects> EffectMap;
 
 public:
 	int32 GetCompositeSectionsNumber();
@@ -31,6 +35,10 @@ public:
 
 	UFUNCTION()
 	virtual void OnCancelled();
+
+	//自定义绑定接收函数,伤害
+	UFUNCTION()
+	virtual	void OnDamageGameplayEvent(FGameplayTag InGameplayTag, const FGameplayEventData Payload);
 
 public:
 	//蓝图写的

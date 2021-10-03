@@ -137,26 +137,39 @@ void AMMOARPGGameMode::RecvProtocol(uint32 ProtocolNumber, FSimpleChannel* Chann
 					}
 					return MethodUnit::EServerCallType::INPROGRESS;
 				});
+		}
+		break;
+	}
+	case SP_GetCharacterDataResponses:
+	{
+		int32 UserID = INDEX_NONE;
+		//int32 CharacerID =INDEX_NONE;
+		FString CDJsonString;
+		SIMPLE_PROTOCOLS_RECEIVE(SP_GetCharacterDataResponses, UserID, CDJsonString);
 
-#if 0
-			//遍历寻找对应Id玩家
-			MethodUnit::ServerCallAllPlayer<AMMOARPGPlayerCharacter>(GetWorld(),
-				[&](AMMOARPGPlayerCharacter* InPawn)->MethodUnit::EServerCallType
+		if (UserID!=INDEX_NONE && !CDJsonString.IsEmpty())
+		{
+			MethodUnit::ServerCallAllPlayerController<AMMOARPGPlayerController>(GetWorld(),
+				[&](AMMOARPGPlayerController* InController)->MethodUnit::EServerCallType
 				{
-					if (InPawn->GetUserID() == UserID)
+					if (AMMOARPGPlayerCharacter* InPawn = InController->GetPawn<AMMOARPGPlayerCharacter>())
 					{
-						InPawn->UpdateKneadingBody(CA);
-						InPawn->CallUpdateKneadingBody(CA);
-						return MethodUnit::EServerCallType::PROGRESS_COMPLETE;
+						if (InPawn->GetUserID() == UserID)
+						{	//Json转回属性集
+							FMMOARPGCharacterAttribute CharacterAttribute;
+							NetDataAnalysis::StringToCharacterAttribute(CDJsonString,CharacterAttribute);
+
+							InPawn->UpdateCharacterAttribute(CharacterAttribute);
+
+							return MethodUnit::EServerCallType::PROGRESS_COMPLETE;
+						}
 					}
 					return MethodUnit::EServerCallType::INPROGRESS;
 				});
-#endif
-
 		}
-
 		break;
 	}
+	
 	default:
 		break;
 	}
@@ -188,5 +201,10 @@ void AMMOARPGGameMode::PostLogin(APlayerController* NewPlayer)
 void AMMOARPGGameMode::LoginCharacterUpdateKneadingRequest(int32 InUserID)
 {
 	SEND_DATA(SP_UpdateLoginCharacterInfoRequests, InUserID);
+}
+
+void AMMOARPGGameMode::GetCharacterDataRequests(int32 InUserID, int32 InCharacterID)
+{
+	SEND_DATA(SP_GetCharacterDataRequests,InUserID, InCharacterID);
 }
 

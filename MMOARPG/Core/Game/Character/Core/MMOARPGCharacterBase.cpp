@@ -40,6 +40,8 @@ AMMOARPGCharacterBase::AMMOARPGCharacterBase(const FObjectInitializer& ObjectIni
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	AttributeSet= CreateDefaultSubobject<UMMOARPGAttributeSet>(TEXT("AttributeSet"));
+
 	FlyComponent = CreateDefaultSubobject<UFlyComponent>(TEXT("FlyComponent"));
 	SwimmingComponent = CreateDefaultSubobject<USwimmingComponent>(TEXT("SwimmingComponent"));
 	ClimbingComponent = CreateDefaultSubobject<UClimbingComponent>(TEXT("ClimbingComponent"));
@@ -81,10 +83,12 @@ void AMMOARPGCharacterBase::BeginPlay()
 					InstanceBase->InitAnimInstance(this);
 				} 
 			}
+		}		
+		TArray<UAttributeSet*> AttributeSets;
+		AttributeSets.Add(AttributeSet);
 
-		}	
+		AbilitySystemComponent->SetSpawnedAttributes(AttributeSets);
 	}
-
 }
 
 // Called every frame
@@ -114,6 +118,14 @@ void AMMOARPGCharacterBase::ResetActionState(ECharacterActionState InActionState
 	}
 }
 
+//角色属性更新 广播接口
+void AMMOARPGCharacterBase::UpdateCharacterAttribute_Implementation(const FMMOARPGCharacterAttribute& CharacterAttribute)
+{
+	if (AttributeSet)
+	{
+		AttributeSet->RegistrationProperties(CharacterAttribute);
+	}
+}
 
 void AMMOARPGCharacterBase::SwitchActionStateOnServer_Implementation(ECharacterActionState InActionState)
 {
